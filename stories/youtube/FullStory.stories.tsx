@@ -4713,7 +4713,7 @@ export function MainGridGinnView({ orangeColor = "#E14920" }: { orangeColor?: st
           .mg-ginn-test .mg-bot-right-grid {
             display: grid !important;
             grid-template-columns: 1fr 1fr !important;
-            grid-template-rows: 160px 180px 180px !important;
+            grid-template-rows: 160px 224px 180px !important;
             width: 100% !important;
           }
 
