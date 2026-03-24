@@ -4718,12 +4718,6 @@ export function MainGridGinnView({ orangeColor = "#E14920" }: { orangeColor?: st
             grid-template-rows: 160px 224px 180px !important;
             width: 100% !important;
           }
-          /* Force equal columns — prevent content from stretching beyond 1fr */
-          .mg-ginn-test .mg-bot-left-grid > *,
-          .mg-ginn-test .mg-bot-right-grid > * {
-            min-width: 0 !important;
-            overflow: hidden !important;
-          }
 
           /* ── Hide column (width) handles — row (height) handles stay */
           .mg-handle-col {
