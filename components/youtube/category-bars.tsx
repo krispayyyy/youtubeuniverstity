@@ -35,7 +35,7 @@ function playTick() {
   if (now - _lastTickTime < TICK_COOLDOWN_MS) return;
   _lastTickTime = now;
   if (!_tickAudio) {
-    _tickAudio = new Audio("/sounds/tick.mp3");
+    _tickAudio = new Audio("./sounds/tick.mp3");
     // matches the volume set on the bento grid's GridCard tick
     _tickAudio.volume = 0.35;
   }

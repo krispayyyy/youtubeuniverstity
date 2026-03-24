@@ -582,7 +582,7 @@ function fgPlayTick() {
   if (now - _fgLastTick < FG_TICK_CD) return;
   _fgLastTick = now;
   if (!_fgTickAudio) {
-    _fgTickAudio = new Audio("/sounds/tick.mp3");
+    _fgTickAudio = new Audio("./sounds/tick.mp3");
     _fgTickAudio.volume = 0.35;
   }
   _fgTickAudio.currentTime = 0;
@@ -1353,7 +1353,7 @@ let _streakPopAudio: HTMLAudioElement | null = null;
 function playStreakPop() {
   if (typeof window === "undefined") return;
   if (!_streakPopAudio) {
-    _streakPopAudio = new Audio("/sounds/pop-click.wav");
+    _streakPopAudio = new Audio("./sounds/pop-click.wav");
     _streakPopAudio.volume = 0.45;
   }
   _streakPopAudio.currentTime = 0;
@@ -1479,7 +1479,7 @@ export function getChannelUrlForChannel(channelName: string): string | null {
 }
 
 /** Hero clip for picks modal — file lives in `public/media/` (see `public/media/README.md`). */
-export const TOP_CHANNEL_MODAL_HERO_VIDEO = "/media/top-channel-modal-hero.mp4";
+export const TOP_CHANNEL_MODAL_HERO_VIDEO = "./media/top-channel-modal-hero.mp4";
 const MODAL_HERO_TRIM_LEAD_SEC = 5;
 const MODAL_HERO_TRIM_TAIL_SEC = 3;
 
@@ -1796,9 +1796,9 @@ export function TopChannelPicksModal({
 // ─── Late Night Learning Modal ────────────────────────────────────────────────
 
 export const LATE_NIGHT_PERSONAS = [
-  { id: "male",   avatarSrc: "/avatars/character1.png", videoSrc: "/character.mp4", easterEgg: false },
-  { id: "female", avatarSrc: "/avatars/character2.png", videoSrc: "/vid2.mp4",      easterEgg: false },
-  { id: "wild",   avatarSrc: "/avatars/character3.png", videoSrc: "/vid3.mp4",      easterEgg: true  },
+  { id: "male",   avatarSrc: "./avatars/character1.png", videoSrc: "./character.mp4", easterEgg: false },
+  { id: "female", avatarSrc: "./avatars/character2.png", videoSrc: "./vid2.mp4",      easterEgg: false },
+  { id: "wild",   avatarSrc: "./avatars/character3.png", videoSrc: "./vid3.mp4",      easterEgg: true  },
 ];
 
 // All three personas shown — Avatar 3 is the Easter egg bonus

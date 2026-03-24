@@ -214,8 +214,8 @@ export function Lines({
   className?: string;
   style?: React.CSSProperties;
 } & Omit<React.HTMLProps<HTMLDivElement>, "ref">) {
-  const popSnapIn  = useSound("/sounds/pop-1.mp3",    SOUND_OPTIONS);
-  const popSnapOut = useSound("/sounds/pop-2.wav",    SOUND_OPTIONS);
+  const popSnapIn  = useSound("./sounds/pop-1.mp3",    SOUND_OPTIONS);
+  const popSnapOut = useSound("./sounds/pop-2.wav",    SOUND_OPTIONS);
 
   const { setActiveIndex, setMorph, y } = useGraph();
   const rubberband = React.useRef(false);
@@ -620,8 +620,8 @@ export default function YouTubeLineGraph({
 
   const lastClientX = React.useRef(0);
 
-  const tick     = useSound("/sounds/tick.mp3",    SOUND_OPTIONS);
-  const popClick = useSound("/sounds/pop-click.wav", SOUND_OPTIONS);
+  const tick     = useSound("./sounds/tick.mp3",    SOUND_OPTIONS);
+  const popClick = useSound("./sounds/pop-click.wav", SOUND_OPTIONS);
 
   function getIndexFromX(xVal: number) {
     const scrollLeft = rootRef.current?.scrollLeft  ?? 0;

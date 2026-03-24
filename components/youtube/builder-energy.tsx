@@ -14,7 +14,7 @@ let _popClickAudio: HTMLAudioElement | null = null;
 function playPopClick() {
   if (typeof window === "undefined") return;
   if (!_popClickAudio) {
-    _popClickAudio = new Audio("/sounds/pop-click.wav");
+    _popClickAudio = new Audio("./sounds/pop-click.wav");
     // volume: 0.45 — slightly louder than the hover tick, matches a deliberate action
     _popClickAudio.volume = 0.45;
   }

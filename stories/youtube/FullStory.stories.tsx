@@ -388,7 +388,7 @@ function ShareModal({ onClose, stats }: { onClose: () => void; stats: YouTubeSta
       await new Promise<void>((r) => { cardImg.onload = () => r(); });
 
       // ── Step 2: load the pre-recorded sphere loop ─────────────────────────────
-      const videoRes = await fetch("/sphere-loop.mp4");
+      const videoRes = await fetch("./sphere-loop.mp4");
       if (!videoRes.ok) { openXIntent(); return; }
       const videoBlob = await videoRes.blob();
       const videoUrl = URL.createObjectURL(videoBlob);
@@ -1434,7 +1434,7 @@ function playTick() {
   _lastTickTime = now;
   if (!_tickAudio) {
     // lazy init: create once on first hover, avoids blocking page load
-    _tickAudio = new Audio("/sounds/tick.mp3");
+    _tickAudio = new Audio("./sounds/tick.mp3");
     // volume: 0.35 sits under the visual feedback without competing (try 0.1–0.6)
     _tickAudio.volume = 0.35;
   }
@@ -2571,7 +2571,7 @@ function GridView() {
         <GridCard delay={0.47} style={{ gridColumn: "1 / 3", gridRow: "5", overflow: "hidden" }}>
           <div style={{ position: "relative", height: "100%", overflow: "hidden" }}>
             <video
-              src="/character.mp4"
+              src="./character.mp4"
               poster="/charcterim.png"
               loop
               muted
@@ -2602,7 +2602,7 @@ function GridView() {
         <GridCard delay={0.52} style={{ gridColumn: "1 / 3", gridRow: "6", overflow: "hidden" }}>
           <div style={{ position: "relative", height: "100%", overflow: "hidden", backgroundColor: "#000" }}>
             <img
-              src="/character-pixel.png"
+              src="./character-pixel.png"
               style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
             />
           </div>
@@ -2747,7 +2747,7 @@ const MG_toolLoyaltyMax = 169;
 let _mainGridPopAudio: HTMLAudioElement | null = null;
 function playMainGridPop() {
   if (typeof window === "undefined") return;
-  if (!_mainGridPopAudio) { _mainGridPopAudio = new Audio("/sounds/pop-click.wav"); _mainGridPopAudio.volume = 0.45; }
+  if (!_mainGridPopAudio) { _mainGridPopAudio = new Audio("./sounds/pop-click.wav"); _mainGridPopAudio.volume = 0.45; }
   _mainGridPopAudio.currentTime = 0;
   _mainGridPopAudio.play().catch(() => {});
 }
@@ -3567,7 +3567,7 @@ function MainGridView({ ginnMode = false, accentColor = "#E95F38" }: { ginnMode?
   const mgTopChannelInteractive = true;
   const mgTopChannelHeroSrc: string | null =
     mgTopChannelKind === "dive"   ? TOP_CHANNEL_MODAL_HERO_VIDEO :
-    mgTopChannelKind === "howiai" ? "/media/how-i-ai-modal-hero.mp4" :
+    mgTopChannelKind === "howiai" ? "./media/how-i-ai-modal-hero.mp4" :
     null; // null = generic variant (subscribe pill + picks, no video)
 
   // ── Bento layout state ─────────────────────────────────────────────────────
