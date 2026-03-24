@@ -1,0 +1,209 @@
+@import 'tailwindcss';
+@import url('https://fonts.googleapis.com/css2?family=Geist+Mono:wght@100..900&display=swap');
+
+@font-face {
+  font-family: 'PP Neue Montreal';
+  src: url('/fonts/PPNeueMontreal-Book.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'PP Neue Montreal';
+  src: url('/fonts/PPNeueMontreal-Medium.otf') format('opentype');
+  font-weight: 500;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'PP Neue Montreal';
+  src: url('/fonts/PPNeueMontreal-Bold.otf') format('opentype');
+  font-weight: 700;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'PP Neue Montreal';
+  src: url('/fonts/PPNeueMontreal-Italic.otf') format('opentype');
+  font-weight: 400;
+  font-style: italic;
+}
+
+@theme {
+  /* Dark mode color system */
+  --color-gray8: hsl(0 0% 31.2%);
+  --color-gray9: hsl(0 0% 43.9%);
+  --color-gray11: hsl(0 0% 62.8%);
+  --color-gray12: hsl(0 0% 93%);
+  --color-orange: #E95F38;
+
+  /* Override Tailwind's mono stack to use PP Neue Montreal everywhere */
+  --font-mono: 'PP Neue Montreal', ui-monospace, monospace;
+  --font-sans: 'PP Neue Montreal', system-ui, sans-serif;
+}
+
+/* ─── PlayerZero Theme System ─────────────────────────────────────────────── */
+
+/* Dark mode (default) */
+:root,
+[data-theme="dark"] {
+  --color-orange: #E95F38;
+
+  /* Gray scale — override @theme static values so they flip with theme */
+  --color-gray8: #A9A295;
+  --color-gray9: #6B6560;
+  --color-gray11: #BFB8AD;
+  --color-gray12: #DCD6D0;
+
+  /* Backgrounds */
+  --bg-primary: #181818;
+  --bg-surface: #1E1D1B;
+  --bg-elevated: #252321;
+
+  /* Text */
+  --text-primary: #DCD6D0;
+  --text-secondary: #BFB8AD;
+  --text-muted: #A9A295;
+  --text-faint: #6B6560;
+
+  /* Borders */
+  --border-primary: #393634;
+  --border-subtle: #2A2725;
+
+  /* Accent */
+  --accent: #E95F38;
+  --accent-green: #2C4124;
+
+  /* Surfaces (for pills, cards, search tags) */
+  --surface-pill: #252321;
+  --surface-pill-border: #393634;
+
+  /* Dividers */
+  --divider: #2A2725;
+
+  /* Overlay alphas (for borders/bg that use white alpha in dark, black alpha in light) */
+  --overlay-subtle: rgba(255, 255, 255, 0.04);
+  --overlay-medium: rgba(255, 255, 255, 0.08);
+  --overlay-strong: rgba(255, 255, 255, 0.15);
+
+  /* Floating pill overlays (line graph stats pill, popovers) — #1B1718 base */
+  --pill-bg: rgba(27, 23, 24, 0.96);
+  --pill-bg-active: rgba(33, 29, 30, 0.98);
+
+  /* Expanded modal cards — warm dark from PlayerZero/Metalab reference */
+  --modal-bg: #1B1718;
+
+  /* Grid card hover */
+  --card-bg-hover: #252321;
+  --card-shadow-hover: 0 0 20px rgba(255, 255, 255, 0.05);
+
+  /* Inner-shadow card system (hover test) — layered like real light on glass */
+  --card-shadow-rest:
+    inset 0 0.5px 0 0 rgba(255,255,255,0.04),
+    inset 0 -0.5px 1px 0 rgba(0,0,0,0.15);
+  --card-shadow-hover-inner:
+    inset 0 0.5px 0 0 rgba(255,255,255,0.11),
+    inset 0 1px 2px 0 rgba(255,255,255,0.05),
+    inset 0 -1px 3px 0 rgba(0,0,0,0.30),
+    0 1px 3px -1px rgba(180,178,189,0.10),
+    0 0 0 0.5px rgba(255,255,255,0.06);
+  --card-border-rest: rgba(255,255,255,0.05);
+  --card-border-hover: rgba(255,255,255,0.09);
+
+  /* Callout system */
+  --callout-text: #DCD6D0;
+  --callout-sub: #A9A295;
+}
+
+/* Light mode */
+[data-theme="light"] {
+  /* Gray scale flipped for light mode — darkened for visibility on #DCD6D0 */
+  --color-gray8: #8A8279;
+  --color-gray9: #6B6560;
+  --color-gray11: #393634;
+  --color-gray12: #181818;
+
+  --bg-primary: #DCD6D0;
+  --bg-surface: #E8E3DE;
+  --bg-elevated: #F2EDE8;
+
+  --text-primary: #181818;
+  --text-secondary: #393634;
+  --text-muted: #6B6560;
+  --text-faint: #8A8279;
+
+  --border-primary: #BFB8AD;
+  --border-subtle: #D0CAC4;
+
+  --accent: #E95F38;
+  --accent-green: #2C4124;
+
+  --surface-pill: #F2EDE8;
+  --surface-pill-border: #BFB8AD;
+
+  --divider: #D0CAC4;
+
+  --overlay-subtle: rgba(0, 0, 0, 0.04);
+  --overlay-medium: rgba(0, 0, 0, 0.08);
+  --overlay-strong: rgba(0, 0, 0, 0.15);
+
+  --pill-bg: rgba(242, 237, 232, 0.96);
+  --pill-bg-active: rgba(232, 227, 222, 0.98);
+
+  --modal-bg: #E8E3DE;
+
+  /* Grid card hover */
+  --card-bg-hover: rgba(0, 0, 0, 0.08);
+  --card-shadow-hover: 0 8px 28px rgba(0, 0, 0, 0.20);
+
+  /* Inner-shadow card system (hover test) */
+  --card-shadow-rest:
+    inset 0 0.5px 0 0 rgba(255,255,255,0.45),
+    inset 0 -0.5px 1px 0 rgba(0,0,0,0.04);
+  --card-shadow-hover-inner:
+    inset 0 0.5px 0 0 rgba(255,255,255,0.65),
+    inset 0 1px 2px 0 rgba(255,255,255,0.25),
+    inset 0 -1px 3px 0 rgba(0,0,0,0.06),
+    0 1px 4px -1px rgba(0,0,0,0.08),
+    0 0 0 0.5px rgba(0,0,0,0.04);
+  --card-border-rest: rgba(0,0,0,0.06);
+  --card-border-hover: rgba(0,0,0,0.10);
+
+  --callout-text: #181818;
+  --callout-sub: #6B6560;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: 'PP Neue Montreal', system-ui, sans-serif;
+  font-weight: 500;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Smooth theme transitions — scoped to layout elements, not motion-animated children */
+[data-theme] section,
+[data-theme] h1,
+[data-theme] h2,
+[data-theme] h3,
+[data-theme] p,
+[data-theme] span,
+[data-theme] a {
+  transition: color 0.3s ease;
+}
+
+/* Mono font override */
+.font-mono,
+[class*="font-mono"],
+code, kbd, samp, pre {
+  font-family: 'PP Neue Montreal', ui-monospace, monospace !important;
+}
+
+.translate-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}

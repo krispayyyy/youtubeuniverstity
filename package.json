@@ -1,0 +1,43 @@
+{
+  "name": "youtubeuniverstity",
+  "version": "1.0.0",
+  "description": "A personal analytics dashboard that visualizes your YouTube watch history, search patterns, and learning habits",
+  "private": false,
+  "license": "MIT",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "storybook": "storybook dev -p 6006 -h 127.0.0.1",
+    "build-storybook": "storybook build"
+  },
+  "dependencies": {
+    "@types/papaparse": "^5.5.2",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "framer-motion": "^12.29.0",
+    "motion": "^12.34.3",
+    "html-to-image": "^1.11.13",
+    "jszip": "^3.10.1",
+    "next": "^16.0.10",
+    "papaparse": "^5.5.3",
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3",
+    "tailwind-merge": "^3.5.0"
+  },
+  "devDependencies": {
+    "@storybook/addon-a11y": "10.2.0",
+    "@storybook/addon-docs": "10.2.0",
+    "@storybook/nextjs-vite": "10.2.0",
+    "@tailwindcss/postcss": "^4.1.18",
+    "@types/node": "^25.0.10",
+    "@types/react": "^19.2.9",
+    "@types/react-dom": "^19.2.3",
+    "autoprefixer": "^10.4.23",
+    "postcss": "^8.5.6",
+    "storybook": "10.2.0",
+    "tailwindcss": "^4.1.18",
+    "typescript": "^5.9.3",
+    "vite": "^7.3.1"
+  }
+}
