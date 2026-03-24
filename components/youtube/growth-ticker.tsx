@@ -266,10 +266,10 @@ function ToolDropdownMenu({
         top,
         left,
         zIndex: 10050,
-        background: "#1e1b18",
+        background: "var(--bg-elevated)",
         border: "1px solid var(--overlay-medium)",
         borderRadius: 8,
-        boxShadow: "0 8px 24px rgba(0,0,0,0.6)",
+        boxShadow: "0 8px 24px rgba(0,0,0,0.25)",
         overflow: "hidden",
         minWidth: 140,
       }}
