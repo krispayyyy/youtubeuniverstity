@@ -4345,7 +4345,7 @@ function MainGridView({ ginnMode = false, accentColor = "#E95F38" }: { ginnMode?
   );
 }
 
-// MainGrid draft story removed for public release
+// MainGrid removed for public release
 
 // ─── MainGrid with Geist Mono typeface ───────────────────────────────────────
 //
@@ -4377,7 +4377,7 @@ function MainGridGeistView() {
   );
 }
 
-// MainGridGeist draft story removed for public release
+// MainGridGeist removed for public release
 
 // ─── Main Grid Ginn Test ──────────────────────────────────────────────────────
 // Applies the Jin Su Park / Ginn card aesthetic to the main grid for evaluation.
@@ -4715,8 +4715,14 @@ export function MainGridGinnView({ orangeColor = "#E14920" }: { orangeColor?: st
           .mg-ginn-test .mg-bot-right-grid {
             display: grid !important;
             grid-template-columns: 1fr 1fr !important;
-            grid-template-rows: 160px 180px 180px !important;
+            grid-template-rows: 160px 224px 180px !important;
             width: 100% !important;
+          }
+          /* Force equal columns — prevent content from stretching beyond 1fr */
+          .mg-ginn-test .mg-bot-left-grid > *,
+          .mg-ginn-test .mg-bot-right-grid > * {
+            min-width: 0 !important;
+            overflow: hidden !important;
           }
 
           /* ── Hide column (width) handles — row (height) handles stay */
