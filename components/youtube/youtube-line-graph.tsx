@@ -128,7 +128,7 @@ function isFirstOfMonth(buckets: DayBucket[], i: number): boolean {
  * "break" effect seen in the original LineGraph (where multiple activities
  * on one day render as stacked segments with a gap between them).
  *
- * Mirrors a typical learning pattern:
+ * Mirrors Karim's real pattern:
  *   - ≤4 videos  → single session (no break)
  *   - 5–14       → two sessions: primary (noon) + secondary (midnight)
  *   - 15+        → three sessions: noon / evening / midnight
@@ -563,7 +563,7 @@ export default function YouTubeLineGraph({
   const activeBucket = isActiveDay && !isOfflineDay ? data[activeIndex!] : null;
 
   // "Day N" is more narrative than a calendar date — it communicates the arc
-  // of a learning journey without requiring calendar context.
+  // of a learning journey without requiring the viewer to know Karim's calendar.
   // Fallback to the last day (total span) when nothing is hovered.
   const activeDayLabel = isActiveDay
     ? `Day ${activeIndex! + 1}`
@@ -662,6 +662,18 @@ export default function YouTubeLineGraph({
   function onPointerDown() {
     popClick();
     setPressed(true);
+  }
+
+  // Touch drag: scrub through bars by dragging finger horizontally
+  function onTouchMove(e: React.TouchEvent<HTMLDivElement>) {
+    const touch = e.touches[0];
+    if (!touch) return;
+    lastClientX.current = touch.clientX;
+    const snappedX = getSnappedX(touch.clientX);
+    const index = getIndexFromX(snappedX);
+    if (index < 0 || index >= data.length) return;
+    x.set(snappedX);
+    setIndexWithSound(index);
   }
 
   function onPointerMove(e: React.PointerEvent<HTMLDivElement>) {
@@ -791,8 +803,9 @@ export default function YouTubeLineGraph({
           onPointerMove={onPointerMove}
           onPointerDown={onPointerDown}
           onPointerUp={() => setPressed(false)}
+          onTouchMove={onTouchMove}
           value={context}
-          style={{ height: "480px" }}
+          style={{ height: "480px", touchAction: "pan-y" }}
         >
           <Lines ref={boundsRef} buckets={data} />
           <Cursor>
@@ -879,7 +892,7 @@ export default function YouTubeLineGraph({
         {/* ── Pill / expandable stats card ─────────────────────────────────── */}
         {/* Motion notes (Morph Surface principles):                             */}
         {/*   • `initial={false}` — prevents borderRadius animating on load.     */}
-        {/*   • Spring 550/45/0.7 = SURFACE_SPRING constant.                     */}
+        {/*   • Spring 550/45/0.7 = Rauno's SURFACE_SPRING constant.             */}
         {/*   • `delay: 0.08` on collapse gives content time to start fading     */}
         {/*     before the surface shrinks (Motion Choreography).                */}
         {/*   • `overflow: hidden` clips content to the shape during spring.     */}

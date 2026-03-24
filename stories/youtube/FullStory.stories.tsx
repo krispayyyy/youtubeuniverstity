@@ -1,5 +1,6 @@
 import * as React from "react";
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { useMediaQuery } from "@/components/use-media-query";
 import { MOCK_STATS } from "./mock-data";
 import ContributionHeatmap from "@/components/youtube/contribution-heatmap";
 import Odometer from "@/components/youtube/odometer";
@@ -3461,6 +3462,7 @@ function MainGridView({ ginnMode = false, accentColor = "#E95F38" }: { ginnMode?
   const [subscriptionsOpen, setSubscriptionsOpen]     = React.useState(false);
   const [lateNightOpen, setLateNightOpen]             = React.useState(false);
   const [lateNightPersona, setLateNightPersona]       = React.useState(0);
+  const isTouchDevice = useMediaQuery("(hover: none)");
   const [enjHovered, setEnjHovered]                   = React.useState(false);
   const [enjModalOpen, setEnjModalOpen]               = React.useState(false);
   // default to top category by watch percentage, not hardcoded "ai"
@@ -3567,7 +3569,7 @@ function MainGridView({ ginnMode = false, accentColor = "#E95F38" }: { ginnMode?
   const mgTopChannelInteractive = true;
   const mgTopChannelHeroSrc: string | null =
     mgTopChannelKind === "dive"   ? TOP_CHANNEL_MODAL_HERO_VIDEO :
-    mgTopChannelKind === "howiai" ? "./media/how-i-ai-modal-hero.mp4" :
+    mgTopChannelKind === "howiai" ? "./media/how-i-ai-modal-hero.mov" :
     null; // null = generic variant (subscribe pill + picks, no video)
 
   // ── Bento layout state ─────────────────────────────────────────────────────
@@ -4056,7 +4058,7 @@ function MainGridView({ ginnMode = false, accentColor = "#E95F38" }: { ginnMode?
                     className="select-none"
                     style={{
                       fontSize: 9,
-                      color: enjHovered ? "var(--text-secondary)" : "var(--text-faint)",
+                      color: (isTouchDevice || enjHovered) ? "var(--text-secondary)" : "var(--text-faint)",
                       letterSpacing: "0.1em",
                       textTransform: "uppercase",
                       transition: "color 0.15s ease",
@@ -4072,7 +4074,7 @@ function MainGridView({ ginnMode = false, accentColor = "#E95F38" }: { ginnMode?
                 <div style={{ flex: 1, display: "flex", alignItems: "center" }}>
                   <EnjProgress
                     progress={computeDesignEngineerScore(stats) / 100}
-                    hovered={enjHovered}
+                    hovered={isTouchDevice || enjHovered}
                     hideLabel
                     showFooter
                     glass={DEFAULT_GLASS}
@@ -4713,7 +4715,7 @@ export function MainGridGinnView({ orangeColor = "#E14920" }: { orangeColor?: st
           .mg-ginn-test .mg-bot-right-grid {
             display: grid !important;
             grid-template-columns: 1fr 1fr !important;
-            grid-template-rows: 160px 224px 180px !important;
+            grid-template-rows: 160px 180px 180px !important;
             width: 100% !important;
           }
 
