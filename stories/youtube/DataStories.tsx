@@ -566,28 +566,8 @@ function getDayOfWeekAvgStr(type: "weekend" | "weekday") {
 
 // ─── Storybook meta ──────────────────────────────────────────────────────────
 
-const meta = {
-  title: "YouTube/Data Stories",
-  excludeStories: /^[A-Z_]+$/,
-  parameters: {
-    layout: "fullscreen",
-    backgrounds: { default: "dark", values: [{ name: "dark", value: "#111" }] },
-    nextjs: { appDirectory: true },
-  },
-} satisfies Meta;
-
-export default meta;
-type Story = StoryObj;
-
-/** All data stories — browse the full menu of narrative options */
-export const AllStories: Story = {
-  render: () => <DataStoriesPage cards={ALL_CARDS} />,
-};
-
-/** Only the flagged data stories — shortlisted candidates */
-export const Flagged: Story = {
-  render: () => <DataStoriesPage cards={ALL_CARDS.filter((c) => c.flagged)} />,
-};
+// Meta removed — this file only exports components used by FullStory.
+// No Storybook stories are registered from this file.
 
 // ─── FlaggedGrid — interactive grid cards ─────────────────────────────────────
 

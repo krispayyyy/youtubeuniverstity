@@ -60,8 +60,8 @@ import {
   SubscriptionsModal,
   LateNightLearningModal,
   LATE_NIGHT_PERSONAS,
-} from "./DataStories.stories";
-import { EnjProgress, ProgressPill, DEFAULT_GLASS, ChecklistModal1 } from "./EnjProgress.stories";
+} from "./DataStories";
+import { EnjProgress, ProgressPill, DEFAULT_GLASS, ChecklistModal1 } from "./EnjProgress";
 
 /** Re-hydrate Date fields that JSON.stringify serialized to ISO strings */
 function hydrateStats(raw: typeof rawDefaultStats): YouTubeStats {
@@ -938,7 +938,7 @@ function FullStoryView() {
 }
 
 const meta = {
-  title: "YouTube/FullPage",
+  title: "YouTube University",
   component: FullStoryView,
   parameters: {
     layout: "fullscreen",
@@ -4343,9 +4343,7 @@ function MainGridView({ ginnMode = false, accentColor = "#E95F38" }: { ginnMode?
   );
 }
 
-export const MainGrid: Story = {
-  render: () => <MainGridView />,
-};
+// MainGrid draft story removed for public release
 
 // ─── MainGrid with Geist Mono typeface ───────────────────────────────────────
 //
@@ -4377,9 +4375,7 @@ function MainGridGeistView() {
   );
 }
 
-export const MainGridGeist: Story = {
-  render: () => <MainGridGeistView />,
-};
+// MainGridGeist draft story removed for public release
 
 // ─── Main Grid Ginn Test ──────────────────────────────────────────────────────
 // Applies the Jin Su Park / Ginn card aesthetic to the main grid for evaluation.
@@ -4752,8 +4748,8 @@ export function MainGridGinnView({ orangeColor = "#E14920" }: { orangeColor?: st
   );
 }
 
-export const MainGridGinnTest: Story = {
-  name: "Polished grid",
+export const Visualization: Story = {
+  name: "Visualization",
   render: () => <MainGridGinnView orangeColor="#E14920" />,
 };
 
@@ -4805,10 +4801,7 @@ function MainGridGinnMonoView({ orangeColor = "#E14920" }: { orangeColor?: strin
   );
 }
 
-export const MainGridGinnMono: Story = {
-  name: "Polished grid — Mono",
-  render: () => <MainGridGinnMonoView orangeColor="#E14920" />,
-};
+// Mono variant removed for public release
 
 // ─── Hover test: inner-shadow / outline variant ──────────────────────────────
 //

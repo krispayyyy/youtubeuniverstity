@@ -36,11 +36,8 @@ function dampen(val: number, [min, max]: [number, number], factor = 2): number {
 
 // ─── Meta ─────────────────────────────────────────────────────────────────────
 
-const meta: Meta = {
-  title: "Youtube / EnjProgress",
-};
-export default meta;
-type Story = StoryObj;
+// Meta removed — this file only exports components used by FullStory.
+// No Storybook stories are registered from this file.
 
 // ─── Progress Pill ────────────────────────────────────────────────────────────
 // Exported so grid cards can place it in their own header row (top-right, like # in LongestStreak)
