@@ -60,8 +60,8 @@ import {
   SubscriptionsModal,
   LateNightLearningModal,
   LATE_NIGHT_PERSONAS,
-} from "./DataStories";
-import { EnjProgress, ProgressPill, DEFAULT_GLASS, ChecklistModal1 } from "./EnjProgress";
+} from "../../components/youtube/modals/DataStories";
+import { EnjProgress, ProgressPill, DEFAULT_GLASS, ChecklistModal1 } from "../../components/youtube/modals/EnjProgress";
 
 /** Re-hydrate Date fields that JSON.stringify serialized to ISO strings */
 function hydrateStats(raw: typeof rawDefaultStats): YouTubeStats {
