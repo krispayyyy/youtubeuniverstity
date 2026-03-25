@@ -1,0 +1,24 @@
+[
+  {
+    "channelName": "Dive Club 🤿",
+    "channelUrl": "https://www.youtube.com/channel/UCkCnraWwlnBw1_i7C9-3p0w",
+    "picks": [
+      { "title": "Carl Rivera - Shopify's big bet on design and craft as the differentiator", "url": "https://www.youtube.com/watch?v=YcYH5v5BPoY" },
+      { "title": "Vibe Coding at Google: Prototyping the all-new AI Studio", "url": "https://www.youtube.com/watch?v=hUGuY_cBkoo" },
+      { "title": "Gabe Valdivia - How to Thrive as an Independent Designer", "url": "https://www.youtube.com/watch?v=tSvn_SmLRj8" },
+      { "title": "Nad Chishtie - How to get hired as a designer at Lovable", "url": "https://www.youtube.com/watch?v=gjMHgG0-pig" },
+      { "title": "Sneak peek of MDS's creative process", "url": "https://www.youtube.com/watch?v=K_7ECqNlTtE" }
+    ]
+  },
+  {
+    "channelName": "How I AI",
+    "channelUrl": "https://www.youtube.com/channel/UCRYY7IEbkHLH_ScJCu9eWDQ",
+    "picks": [
+      { "title": "A 3-step AI coding workflow for solo founders | Ryan Carson (5x founder)", "url": "https://www.youtube.com/watch?v=fD4ktSkNCw4" },
+      { "title": "How custom GPTs can make you a better manager | Hilary Gridley (Head of Core Product at Whoop)", "url": "https://www.youtube.com/watch?v=xDMkkOC-EhI" },
+      { "title": "The beginner's guide to coding with Cursor | Lee Robinson (Head of AI education)", "url": "https://www.youtube.com/watch?v=Gqpk7-FruqI" },
+      { "title": "Successfully coding with AI in large enterprises: Centralized rules, workflows for tech debt, & more", "url": "https://www.youtube.com/watch?v=HtzkfjEH-GU" },
+      { "title": "Mastering ChatGPT: Advanced techniques for workplace communication and productivity | Hiten Shah", "url": "https://www.youtube.com/watch?v=QwtEajzgjWY" }
+    ]
+  }
+]

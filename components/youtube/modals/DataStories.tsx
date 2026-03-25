@@ -2,6 +2,8 @@ import * as React from "react";
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { motion, AnimatePresence, useSpring, useVelocity, useTransform } from "framer-motion";
 import rawDefaultStats from "@/data/stats.json";
+// Curated top picks per channel — derived from real watch history, used as fallback when rawWatchHistory is empty.
+import channelPicksData from "@/data/channel-picks.json";
 // Raw data is loaded dynamically when users upload their YouTube Takeout zip.
 // These empty arrays provide graceful defaults for the demo state.
 const rawWatchHistory: { videoId: string; title: string; channelName: string; channelUrl: string; videoUrl: string; timestamp: string; hour: number; date: string }[] = [];
@@ -1456,26 +1458,41 @@ function watchChannelMatchesTarget(watchChannel: string, target: string) {
   return a === b || a.includes(b) || b.includes(a);
 }
 
-/** Most-watched distinct videos on this channel (from raw history) */
-export function getTopVideosForChannel(channelName: string, limit = 5): { title: string; url: string; watches: number }[] {
+/** Most-watched distinct videos on this channel. Uses uploaded history when available, falls back to curated picks. */
+export function getTopVideosForChannel(
+  channelName: string,
+  limit = 5,
+  history: RawWatchForPicks[] = rawWatchHistory as RawWatchForPicks[],
+): { title: string; url: string; watches: number }[] {
   const map = new Map<string, { title: string; url: string; watches: number }>();
-  for (const v of rawWatchHistory as RawWatchForPicks[]) {
+  for (const v of history) {
     if (!watchChannelMatchesTarget(v.channelName, channelName)) continue;
     const title = decodeWatchTitleHtml(v.title);
     const prev = map.get(v.videoId);
     if (prev) prev.watches += 1;
     else map.set(v.videoId, { title, url: v.videoUrl, watches: 1 });
   }
-  return [...map.values()].sort((x, y) => y.watches - x.watches).slice(0, limit);
+  const fromHistory = [...map.values()].sort((x, y) => y.watches - x.watches).slice(0, limit);
+  if (fromHistory.length > 0) return fromHistory;
+  // Fall back to curated picks derived from real watch history (demo state)
+  const entry = (channelPicksData as { channelName: string; channelUrl: string; picks: { title: string; url: string }[] }[])
+    .find(e => watchChannelMatchesTarget(e.channelName, channelName));
+  return entry ? entry.picks.slice(0, limit).map(p => ({ ...p, watches: 0 })) : [];
 }
 
-/** First channel page URL from takeout for this channel name (for subscribe / open channel). */
-export function getChannelUrlForChannel(channelName: string): string | null {
-  for (const v of rawWatchHistory as RawWatchForPicks[]) {
+/** Channel page URL for this channel. Uses uploaded history when available, falls back to curated picks. */
+export function getChannelUrlForChannel(
+  channelName: string,
+  history: RawWatchForPicks[] = rawWatchHistory as RawWatchForPicks[],
+): string | null {
+  for (const v of history) {
     if (!watchChannelMatchesTarget(v.channelName, channelName)) continue;
     if (v.channelUrl) return v.channelUrl;
   }
-  return null;
+  // Fall back to curated picks data (demo state)
+  const entry = (channelPicksData as { channelName: string; channelUrl: string; picks: { title: string; url: string }[] }[])
+    .find(e => watchChannelMatchesTarget(e.channelName, channelName));
+  return entry?.channelUrl ?? null;
 }
 
 /** Hero clip for picks modal — file lives in `public/media/` (see `public/media/README.md`). */

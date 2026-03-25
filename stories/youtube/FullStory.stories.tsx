@@ -1,5 +1,7 @@
 import * as React from "react";
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { linkTo } from "@storybook/addon-links";
+import { Agentation } from "agentation";
 import { useMediaQuery } from "@/components/use-media-query";
 import { MOCK_STATS } from "./mock-data";
 import ContributionHeatmap from "@/components/youtube/contribution-heatmap";
@@ -351,7 +353,7 @@ function ShareModal({ onClose, stats }: { onClose: () => void; stats: YouTubeSta
       // no backgroundColor: card's own borderRadius + overflow:hidden clips the corners in the PNG
       const dataUrl = await toPng(cardCaptureRef.current, { pixelRatio: 2 });
       const a = document.createElement("a");
-      a.download = "youtube-university-profile.png";
+      a.download = "youtube-profile.png";
       a.href = dataUrl;
       a.click();
     } catch (err) { console.error(err); }
@@ -488,7 +490,7 @@ function ShareModal({ onClose, stats }: { onClose: () => void; stats: YouTubeSta
           const blob = new Blob(chunks, { type: mimeType });
           const objUrl = URL.createObjectURL(blob);
           const a = document.createElement("a");
-          a.download = `youtube-university-profile.${mimeType.includes("mp4") ? "mp4" : "webm"}`;
+          a.download = `youtube-profile.${mimeType.includes("mp4") ? "mp4" : "webm"}`;
           a.href = objUrl;
           a.click();
           setTimeout(() => URL.revokeObjectURL(objUrl), 5000);
@@ -732,6 +734,282 @@ function PageThemeToggle() {
         </motion.svg>
       </div>
     </CTAContainer>
+  );
+}
+
+// ─── Page footer — copyright + info CTA ──────────────────────────────────────
+// Normal flow — sits below the grid, nudges with the page content
+function PageFooter() {
+  const goInfo = linkTo("YouTube University", "Info");
+  return (
+    <div style={{ maxWidth: PAGE_MAX_W, margin: "0 auto", padding: "32px 40px 40px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+      <span className="font-mono select-none" style={{ fontSize: 9, color: "var(--text-faint)", letterSpacing: "0.12em" }}>
+        © 2026 YouTube University
+      </span>
+      <button
+        onClick={goInfo}
+        className="font-mono select-none"
+        style={{ fontSize: 9, color: "var(--text-faint)", letterSpacing: "0.12em", background: "none", border: "none", cursor: "pointer", padding: 0, transition: "color 0.15s ease" }}
+        onMouseEnter={e => (e.currentTarget.style.color = "var(--text-secondary)")}
+        onMouseLeave={e => (e.currentTarget.style.color = "var(--text-faint)")}
+      >
+        Info
+      </button>
+    </div>
+  );
+}
+
+// ─── Info pages — shared data ─────────────────────────────────────────────────
+const FAQ_ITEMS = [
+  { q: "Do we store your data?", a: "No. Everything runs entirely in your browser — your Takeout file never touches a server. Close the tab and it's gone." },
+  { q: "What file do I need?", a: "A Google Takeout export with YouTube history and subscriptions selected. No login required — just export, upload, and explore." },
+  { q: "Is this all my watch history?", a: "Not quite — by design. Shorts, music, gaming, and entertainment are all excluded. This dashboard is focused on how you learn, not cute pet videos." },
+];
+
+const METHODOLOGY_ITEMS = [
+  { label: "Videos counted", detail: "Each entry in watch-history.html is one video. Re-watches within 15 seconds are filtered as duplicates." },
+  { label: "Categories", detail: "Titles and channel names are matched against keyword lists for AI, design, engineering, and startup. Everything else is excluded." },
+  { label: "Builder Energy", detail: "A composite score across category balance, daily consistency, and total volume. Ranges 0–1." },
+  { label: "Night owl %", detail: "How much of your watching happened between midnight and 5am." },
+  { label: "Peak hour", detail: "The single hour of day where you watched the most, across your full history." },
+  { label: "Binge days", detail: "Days with 15 or more videos. Your biggest single-day deep dives." },
+  { label: "Rabbit holes", detail: "Days where 85% or more of your watches landed in one category, with at least 6 total. Signals a real focus day." },
+  { label: "Longest streak", detail: "Most consecutive days with 5 or more videos in one category." },
+  { label: "Top channel", detail: "The channel you've watched the most individual videos from." },
+  { label: "Searches", detail: "Your most repeated search terms, surfaced from your search history and ranked by frequency." },
+];
+
+// Shared back-link used at the top of every info sub-page
+function InfoPageBackLink({ label, onClick }: { label: string; onClick: () => void }) {
+  return (
+    <button
+      onClick={onClick}
+      style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 12, color: "var(--text-faint)", background: "none", border: "none", cursor: "pointer", padding: 0, marginBottom: 48, transition: "color 0.15s ease" }}
+      onMouseEnter={e => (e.currentTarget.style.color = "var(--text-secondary)")}
+      onMouseLeave={e => (e.currentTarget.style.color = "var(--text-faint)")}
+    >
+      <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <polyline points="7 2 3 6 7 10" />
+      </svg>
+      {label}
+    </button>
+  );
+}
+
+// Shared full-page wrapper — matches main page bg exactly, centered column, scrollable
+function InfoPageShell({ children }: { children: React.ReactNode }) {
+  return (
+    <div style={{ backgroundColor: "#0C0C0B", minHeight: "100vh", color: "#fff", overflowY: "auto" }}>
+      {/* tighter column with side breathing room */}
+      <div style={{ maxWidth: 560, margin: "0 auto", padding: "48px 32px 80px" }}>
+        {children}
+      </div>
+    </div>
+  );
+}
+
+// Small dark icon box — compact to match Membership reference proportions
+function InfoIconBox({ children, hovered }: { children: React.ReactNode; hovered?: boolean }) {
+  return (
+    <div style={{
+      width: 32, height: 32,
+      backgroundColor: "#2A2524",
+      borderRadius: 7,
+      display: "flex", alignItems: "center", justifyContent: "center",
+      flexShrink: 0,
+      // barely perceptible lift on hover — just enough to feel alive
+      color: hovered ? "rgba(255,255,255,0.52)" : "rgba(255,255,255,0.45)",
+      transition: "color 0.12s ease",
+    }}>
+      {children}
+    </div>
+  );
+}
+
+// Collapsible accordion row — hover extends slightly past column edges (Membership-style)
+function AccordionRow({ label, body, isLast }: { label: string; body: string; isLast?: boolean }) {
+  const [open, setOpen] = React.useState(false);
+  const [hovered, setHovered] = React.useState(false);
+  return (
+    // separator stays at column width; button bleeds past it on hover
+    <div style={{ borderBottom: isLast ? "none" : "1px solid var(--overlay-medium)" }}>
+      <button
+        onClick={() => setOpen(v => !v)}
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
+        style={{
+          // negative margin + matching padding makes the hover bg bleed 12px on each side
+          margin: "0 -12px",
+          width: "calc(100% + 24px)",
+          display: "flex", alignItems: "center", justifyContent: "space-between",
+          padding: "20px 12px",
+          background: hovered ? "rgba(255,255,255,0.05)" : "none",
+          // borderRadius: rounds the bg only when visible (try 6 for subtler, 12 for pill-ish)
+          borderRadius: 10,
+          border: "none", cursor: "pointer", color: "#fff", textAlign: "left",
+          transition: "background 0.12s ease",
+        }}
+      >
+        <span className="font-mono" style={{ fontSize: 15, letterSpacing: "-0.01em", fontWeight: 400, color: "#fff" }}>{label}</span>
+        {/* chevron rotates 90° when open */}
+        <motion.svg
+          animate={{ rotate: open ? 90 : 0, x: hovered && !open ? 1 : 0 }}
+          // snappySpring: toggle feels instantaneous — spring tracks gesture, not a timer
+          transition={{ type: "spring", stiffness: 500, damping: 50 }}
+          width="13" height="13" viewBox="0 0 12 12" fill="none"
+          stroke={hovered ? "rgba(255,255,255,0.65)" : "rgba(255,255,255,0.35)"} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"
+          style={{ flexShrink: 0, transition: "stroke 0.12s ease" }}
+        >
+          <polyline points="4 2 8 6 4 10" />
+        </motion.svg>
+      </button>
+      {/* body slides open — AnimatePresence unmounts it so layout collapses cleanly */}
+      <AnimatePresence initial={false}>
+        {open && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{
+              height: "auto",
+              opacity: 1,
+              transition: {
+                // defaultSpring: organic open — height breathes in, not snaps
+                height: { type: "spring", stiffness: 400, damping: 40 },
+                // opacity trails height by 40ms so content doesn't flash before space opens
+                opacity: { type: "spring", stiffness: 400, damping: 40, delay: 0.04 },
+              },
+            }}
+            exit={{
+              height: 0,
+              opacity: 0,
+              transition: {
+                // exits lead — 2× stiffness so collapse is crisper than open
+                height: { type: "spring", stiffness: 800, damping: 40 },
+                // opacity snaps out ahead of height so it reads as intentional dismissal
+                opacity: { duration: 0.08 },
+              },
+            }}
+            style={{ overflow: "hidden" }}
+          >
+            <p className="font-mono" style={{ fontSize: 13, color: "rgba(255,255,255,0.5)", lineHeight: 1.7, margin: "0 0 18px", paddingRight: 24 }}>{body}</p>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+// Info nav row — extracted so useState is called at component top level (not inside map)
+function InfoNavRow({ label, icon, onClick }: { label: string; icon: React.ReactNode; onClick: () => void }) {
+  const [hovered, setHovered] = React.useState(false);
+  return (
+    // only bottom border — no top border on any row (Membership convention)
+    <div style={{ borderBottom: "1px solid var(--overlay-medium)" }}>
+      <button
+        onClick={onClick}
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
+        style={{
+          margin: "0 -12px",
+          width: "calc(100% + 24px)",
+          display: "flex", alignItems: "center", gap: 16,
+          padding: "20px 12px",
+          background: hovered ? "rgba(255,255,255,0.05)" : "none",
+          borderRadius: 10,
+          border: "none", cursor: "pointer", color: "#fff",
+          transition: "background 0.12s ease",
+        }}
+      >
+        <InfoIconBox hovered={hovered}>{icon}</InfoIconBox>
+        <span className="font-mono" style={{ fontSize: 15, letterSpacing: "-0.01em", flex: 1, textAlign: "left", color: "#fff" }}>{label}</span>
+        {/* motion.svg: nudges 4px right on hover, springs back to neutral on leave */}
+        <motion.svg
+          animate={{ x: hovered ? 1 : 0 }}
+          transition={{ type: "spring", stiffness: 400, damping: 30 }}
+          width="13" height="13" viewBox="0 0 12 12" fill="none"
+          stroke={hovered ? "rgba(255,255,255,0.65)" : "rgba(255,255,255,0.35)"}
+          strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"
+          style={{ flexShrink: 0, transition: "stroke 0.12s ease" }}
+        >
+          <polyline points="4 2 8 6 4 10" />
+        </motion.svg>
+      </button>
+    </div>
+  );
+}
+
+// ─── Info landing page ────────────────────────────────────────────────────────
+export function InfoPageView() {
+  const goBack        = linkTo("YouTube University", "Polished grid");
+  const goFAQ         = linkTo("YouTube University", "FAQ");
+  const goMethodology = linkTo("YouTube University", "How We Calculate");
+
+  return (
+    <InfoPageShell>
+      <InfoPageBackLink label="Visualization" onClick={goBack} />
+      <h2 className="select-none" style={{ fontSize: 36, color: "#fff", fontWeight: 400, margin: "8px 0 32px", lineHeight: 1.1 }}>Info</h2>
+      <div style={{ display: "flex", flexDirection: "column" }}>
+        <InfoNavRow
+          label="FAQ"
+          onClick={goFAQ}
+          icon={
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M5.5 5.5c0-1.4 1.1-2.5 2.5-2.5s2.5 1.1 2.5 2.5c0 1.2-.9 2-1.8 2.5-.4.2-.7.7-.7 1.2v.3" />
+              <circle cx="8" cy="13" r="0.6" fill="currentColor" stroke="none" />
+            </svg>
+          }
+        />
+        <InfoNavRow
+          label="How we calculate"
+          onClick={goMethodology}
+          icon={
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="4.5" cy="4.5" r="1.75" />
+              <circle cx="11.5" cy="11.5" r="1.75" />
+              <line x1="13" y1="3" x2="3" y2="13" />
+            </svg>
+          }
+        />
+      </div>
+    </InfoPageShell>
+  );
+}
+
+// ─── FAQ page ─────────────────────────────────────────────────────────────────
+export function FAQPageView() {
+  const goInfo = linkTo("YouTube University", "Info");
+
+  return (
+    <InfoPageShell>
+      <InfoPageBackLink label="Info" onClick={goInfo} />
+      <h2 className="select-none" style={{ fontSize: 36, color: "#fff", fontWeight: 400, margin: "8px 0 40px", lineHeight: 1.1 }}>FAQ</h2>
+      {/* no top border on first item — only bottom borders throughout */}
+      <div style={{ display: "flex", flexDirection: "column" }}>
+        {FAQ_ITEMS.map((item, i) => (
+          <AccordionRow key={i} label={item.q} body={item.a} isLast={i === FAQ_ITEMS.length - 1} />
+        ))}
+      </div>
+    </InfoPageShell>
+  );
+}
+
+// ─── How we calculate page ────────────────────────────────────────────────────
+export function MethodologyPageView() {
+  const goInfo = linkTo("YouTube University", "Info");
+
+  return (
+    <InfoPageShell>
+      <InfoPageBackLink label="Info" onClick={goInfo} />
+      <h2 className="select-none" style={{ fontSize: 36, color: "#fff", fontWeight: 400, margin: "0 0 8px", lineHeight: 1.1 }}>How we calculate</h2>
+      <p className="font-mono" style={{ fontSize: 12, color: "rgba(255,255,255,0.4)", lineHeight: 1.7, margin: "0 0 40px" }}>
+        We'd love suggestions on how best to calculate these things, or if there are other items or data that would be valuable to track or represent.
+      </p>
+      {/* no top border on first item — only bottom borders throughout */}
+      <div style={{ display: "flex", flexDirection: "column" }}>
+        {METHODOLOGY_ITEMS.map((item, i) => (
+          <AccordionRow key={i} label={item.label} body={item.detail} isLast={i === METHODOLOGY_ITEMS.length - 1} />
+        ))}
+      </div>
+    </InfoPageShell>
   );
 }
 
@@ -1089,7 +1367,9 @@ function BigStat({
     <div
       onMouseEnter={() => setSectionHovered(true)}
       onMouseLeave={() => setSectionHovered(false)}
-      style={{ flex: 1, display: "flex", flexDirection: "column", gap: 6, padding: "20px 24px", cursor: "default" }}
+      // minWidth: 0 overrides flexbox min-width:auto so all three cells share space equally
+      className="big-stat-cell"
+      style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 6, padding: "20px 24px", cursor: "default" }}
     >
       <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
         <span
@@ -1122,7 +1402,7 @@ function BigStat({
               cursor: "default",
               display: "flex",
               alignItems: "center",
-              // focusVisible: customize don't remove — reduces affordance for keyboard users
+              // focusVisible: customize don't remove — removing this reduces affordance for keyboard users
               outline: "none",
               borderRadius: 4,
             }}
@@ -2603,7 +2883,7 @@ function GridView() {
         <GridCard delay={0.52} style={{ gridColumn: "1 / 3", gridRow: "6", overflow: "hidden" }}>
           <div style={{ position: "relative", height: "100%", overflow: "hidden", backgroundColor: "#000" }}>
             <img
-              src="./character-pixel.png"
+              src="/character-pixel.png"
               style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
             />
           </div>
@@ -2913,7 +3193,7 @@ function MG_RestDayModal({ onClose, dowAvg, quietDay }: { onClose: () => void; d
 }
 
 // ─── LongestStreak modal ─────────────────────────────────────────────────────
-// Motion: stagger ~50ms spirit (capped), spring ~400/40, faster exits on contract
+// Motion: stagger ~50ms (capped), spring ~400/40, faster exits on contract
 
 /** Sprint labels — same naming as Longest Streak card footer / top category */
 const STREAK_SPRINT_NAMES: Record<string, string> = {
@@ -4297,6 +4577,8 @@ function MainGridView({ ginnMode = false, accentColor = "#E95F38" }: { ginnMode?
             />
           </div>
         </section>
+
+        <PageFooter />
       </div>
 
       <AnimatePresence>
@@ -4345,39 +4627,6 @@ function MainGridView({ ginnMode = false, accentColor = "#E95F38" }: { ginnMode?
   );
 }
 
-// MainGrid removed for public release
-
-// ─── MainGrid with Geist Mono typeface ───────────────────────────────────────
-//
-// Swaps PP Neue Montreal for Geist Mono by loading it from Google Fonts and
-// overriding the two places the font is locked in:
-//   1. --font-mono CSS variable (used via var() in inline styles)
-//   2. .font-mono class (overridden globally with !important in globals.css —
-//      a scoped selector with higher specificity beats it)
-//
-function MainGridGeistView() {
-  return (
-    <>
-      <style>{`
-        /* specificity: .maingrid-geist + .font-mono beats the global .font-mono !important */
-        .maingrid-geist .font-mono,
-        .maingrid-geist [class*="font-mono"] {
-          font-family: 'Geist Mono', ui-monospace, monospace !important;
-        }
-
-        /* css-variable: overrides any var(--font-mono) usage in inline styles */
-        .maingrid-geist {
-          --font-mono: 'Geist Mono', ui-monospace, monospace;
-        }
-      `}</style>
-      <div className="maingrid-geist">
-        <MainGridView />
-      </div>
-    </>
-  );
-}
-
-// MainGridGeist removed for public release
 
 // ─── Main Grid Ginn Test ──────────────────────────────────────────────────────
 // Applies the Jin Su Park / Ginn card aesthetic to the main grid for evaluation.
@@ -4740,12 +4989,17 @@ export function MainGridGinnView({ orangeColor = "#E14920" }: { orangeColor?: st
           /* swap full label for short label on mobile */
           .big-stat-label-full { display: none !important; }
           .big-stat-label-short { display: inline !important; }
+
+          /* tighten horizontal padding so all three cells share space equally */
+          .big-stat-cell { padding-left: 16px !important; padding-right: 16px !important; }
         }
 
       `}</style>
       <div className="mg-ginn-test">
         <MainGridView ginnMode accentColor={orangeColor} />
       </div>
+      {/* agentation: floating annotation toolbar for AI agent feedback — only in private/dev */}
+      <Agentation />
     </>
   );
 }
@@ -4803,7 +5057,21 @@ function MainGridGinnMonoView({ orangeColor = "#E14920" }: { orangeColor?: strin
   );
 }
 
-// Mono variant removed for public release
+// ─── Info pages — each is its own story, navigated via linkTo ─────────────────
+export const InfoStory: Story = {
+  name: "Info",
+  render: () => <InfoPageView />,
+};
+
+export const FAQStory: Story = {
+  name: "FAQ",
+  render: () => <FAQPageView />,
+};
+
+export const HowWeCalculateStory: Story = {
+  name: "How We Calculate",
+  render: () => <MethodologyPageView />,
+};
 
 // ─── Hover test: inner-shadow / outline variant ──────────────────────────────
 //

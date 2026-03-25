@@ -339,7 +339,9 @@ export function Cursor({
         height: morph || isTouch ? CURSOR_LARGE_HEIGHT : CURSOR_SIZE,
         scale: pressed ? 0.94 : 1,
         top:  isTouch ? "unset" : 0,
-        left: isTouch ? "unset" : 0,
+        // left: always 0 so translateX(x) maps directly to viewport position.
+        // "unset" would add x onto the cursor's natural DOM offset, causing misalignment.
+        left: 0,
         transition: {
           type: "spring",
           stiffness: 450,
@@ -798,14 +800,32 @@ export default function YouTubeLineGraph({
           />
         </div>
 
+        {/* Mobile scrub zone — middle 30% of height, full width.
+            touchAction:none here captures touch for bar scrubbing.
+            Top/bottom 35% have touchAction:pan-x pan-y so page scroll works there. */}
+        {isTouch && (
+          <div
+            style={{
+              position: "absolute",
+              left: 0, right: 0,
+              top: "35%", height: "30%",
+              touchAction: "none",
+              zIndex: 10,
+            }}
+            onTouchStart={() => { popClick(); setPressed(true); }}
+            onTouchMove={onTouchMove}
+            onTouchEnd={() => setPressed(false)}
+          />
+        )}
         <Provider
           ref={rootRef}
           onPointerMove={onPointerMove}
           onPointerDown={onPointerDown}
           onPointerUp={() => setPressed(false)}
-          onTouchMove={onTouchMove}
           value={context}
-          style={{ height: "480px", touchAction: "pan-y" }}
+          // on touch: pan-x pan-y lets the browser scroll the page outside the scrub zone
+          // on desktop: pan-y only (horizontal stays in JS for bar scrubbing)
+          style={{ height: "480px", touchAction: isTouch ? "pan-x pan-y" : "pan-y" }}
         >
           <Lines ref={boundsRef} buckets={data} />
           <Cursor>
