@@ -1,7 +1,6 @@
 import * as React from "react";
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { linkTo } from "@storybook/addon-links";
-import { Agentation } from "agentation";
 import { useMediaQuery } from "@/components/use-media-query";
 import { MOCK_STATS } from "./mock-data";
 import ContributionHeatmap from "@/components/youtube/contribution-heatmap";
@@ -4998,8 +4997,6 @@ export function MainGridGinnView({ orangeColor = "#E14920" }: { orangeColor?: st
       <div className="mg-ginn-test">
         <MainGridView ginnMode accentColor={orangeColor} />
       </div>
-      {/* agentation: floating annotation toolbar for AI agent feedback — only in private/dev */}
-      <Agentation />
     </>
   );
 }
