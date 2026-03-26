@@ -812,12 +812,13 @@ function InfoIconBox({ children, hovered }: { children: React.ReactNode; hovered
   return (
     <div style={{
       width: 32, height: 32,
-      backgroundColor: "#2A2524",
-      borderRadius: 7,
+      backgroundColor: "var(--overlay-medium)",
+      border: "1px solid rgba(255,255,255,0.02)",
+      borderRadius: 8,
       display: "flex", alignItems: "center", justifyContent: "center",
       flexShrink: 0,
       // barely perceptible lift on hover — just enough to feel alive
-      color: hovered ? "rgba(255,255,255,0.52)" : "rgba(255,255,255,0.45)",
+      color: hovered ? "rgba(255,255,255,0.7)" : "rgba(255,255,255,0.45)",
       transition: "color 0.12s ease",
     }}>
       {children}
@@ -849,7 +850,7 @@ function AccordionRow({ label, body, isLast }: { label: string; body: string; is
           transition: "background 0.12s ease",
         }}
       >
-        <span className="font-mono" style={{ fontSize: 15, letterSpacing: "-0.01em", fontWeight: 400, color: "#fff" }}>{label}</span>
+        <span className="font-mono" style={{ fontSize: 15, letterSpacing: "-0.01em", fontWeight: 500, color: "#fff" }}>{label}</span>
         {/* chevron rotates 90° when open */}
         <motion.svg
           animate={{ rotate: open ? 90 : 0, x: hovered && !open ? 1 : 0 }}
@@ -919,7 +920,7 @@ function InfoNavRow({ label, icon, onClick }: { label: string; icon: React.React
         }}
       >
         <InfoIconBox hovered={hovered}>{icon}</InfoIconBox>
-        <span className="font-mono" style={{ fontSize: 15, letterSpacing: "-0.01em", flex: 1, textAlign: "left", color: "#fff" }}>{label}</span>
+        <span className="font-mono" style={{ fontSize: 15, letterSpacing: "-0.01em", fontWeight: 500, flex: 1, textAlign: "left", color: "#fff" }}>{label}</span>
         {/* motion.svg: nudges 4px right on hover, springs back to neutral on leave */}
         <motion.svg
           animate={{ x: hovered ? 1 : 0 }}
