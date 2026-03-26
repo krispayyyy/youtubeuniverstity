@@ -324,7 +324,8 @@ export function Cursor({
 }) {
   const isHydrated = useIsHydrated();
   const { x, y, idle, morph, pressed, isTouch } = useGraph();
-  if (!isHydrated) return null;
+  // no cursor on touch — interaction is disabled, nothing to track
+  if (!isHydrated || isTouch) return null;
   return (
     <motion.div
       initial={false}
@@ -724,11 +725,8 @@ export default function YouTubeLineGraph({
   );
 
   useMotionValueEvent(scrollX, "change", (latest) => {
-    if (isTouch) {
-      if (latest < 0) { x.set(0); return; }
-      setActiveIndex(Math.floor(latest / LINE_STEP));
-      return;
-    }
+    // on touch: cursor is hidden, no scrubbing — just let the container scroll freely
+    if (isTouch) return;
     // On desktop: `latest` is the scroll *offset* (px scrolled), NOT a viewport
     // X coordinate. Passing it directly to getIndexFromX returns a wildly wrong
     // index (e.g. −28 when scroll=0) and overwrites whatever onPointerMove just
@@ -806,9 +804,9 @@ export default function YouTubeLineGraph({
           onPointerDown={isTouch ? undefined : onPointerDown}
           onPointerUp={isTouch ? undefined : () => setPressed(false)}
           value={context}
-          // on touch: pan-x pan-y — full scroll freedom, no JS interference
+          // on touch: pan-x only so horizontal swipes scroll THIS container, vertical falls through to page
           // on desktop: pan-y only (horizontal stays in JS for bar scrubbing)
-          style={{ height: "480px", touchAction: isTouch ? "pan-x pan-y" : "pan-y" }}
+          style={{ height: "480px", touchAction: isTouch ? "pan-x" : "pan-y" }}
         >
           <Lines ref={boundsRef} buckets={data} />
           <Cursor>
