@@ -937,7 +937,7 @@ function InfoNavRow({ label, icon, onClick }: { label: string; icon: React.React
 }
 
 // ─── Info landing page ────────────────────────────────────────────────────────
-export function InfoPageView() {
+function InfoPageView() {
   const goBack        = linkTo("YouTube University", "Polished grid");
   const goFAQ         = linkTo("YouTube University", "FAQ");
   const goMethodology = linkTo("YouTube University", "How We Calculate");
@@ -974,7 +974,7 @@ export function InfoPageView() {
 }
 
 // ─── FAQ page ─────────────────────────────────────────────────────────────────
-export function FAQPageView() {
+function FAQPageView() {
   const goInfo = linkTo("YouTube University", "Info");
 
   return (
@@ -992,7 +992,7 @@ export function FAQPageView() {
 }
 
 // ─── How we calculate page ────────────────────────────────────────────────────
-export function MethodologyPageView() {
+function MethodologyPageView() {
   const goInfo = linkTo("YouTube University", "Info");
 
   return (

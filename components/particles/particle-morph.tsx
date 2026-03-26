@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, useCallback } from "react";
+import { useMediaQuery } from "@/components/use-media-query";
 import { useMotionValue, animate } from "framer-motion";
 import {
   N_POINTS,
@@ -145,6 +146,9 @@ export function ParticleMorph({
   className,
   style,
 }: ParticleMorphProps) {
+  // disable all pointer interaction on touch devices — no hover or click, just render
+  const isTouch = useMediaQuery("(hover: none)");
+
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -517,10 +521,10 @@ export function ParticleMorph({
     <div
       ref={containerRef}
       className={className}
-      style={{ position: "relative", width: "100%", height: "100%", overflow: "hidden", cursor: cursorDispersion ? "crosshair" : "default", ...style }}
-      onMouseMove={handleMouseMove}
-      onMouseLeave={handleMouseLeave}
-      onClick={handleClick}
+      style={{ position: "relative", width: "100%", height: "100%", overflow: "hidden", cursor: isTouch || !cursorDispersion ? "default" : "crosshair", ...style }}
+      onMouseMove={isTouch ? undefined : handleMouseMove}
+      onMouseLeave={isTouch ? undefined : handleMouseLeave}
+      onClick={isTouch ? undefined : handleClick}
       onWheel={disableScroll ? undefined : handleWheel}
     >
       <canvas ref={canvasRef} style={{ display: "block", width: "100%", height: "100%" }} />

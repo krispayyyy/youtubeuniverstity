@@ -800,30 +800,13 @@ export default function YouTubeLineGraph({
           />
         </div>
 
-        {/* Mobile scrub zone — middle 30% of height, full width.
-            touchAction:none here captures touch for bar scrubbing.
-            Top/bottom 35% have touchAction:pan-x pan-y so page scroll works there. */}
-        {isTouch && (
-          <div
-            style={{
-              position: "absolute",
-              left: 0, right: 0,
-              top: "35%", height: "30%",
-              touchAction: "none",
-              zIndex: 10,
-            }}
-            onTouchStart={() => { popClick(); setPressed(true); }}
-            onTouchMove={onTouchMove}
-            onTouchEnd={() => setPressed(false)}
-          />
-        )}
         <Provider
           ref={rootRef}
-          onPointerMove={onPointerMove}
-          onPointerDown={onPointerDown}
-          onPointerUp={() => setPressed(false)}
+          onPointerMove={isTouch ? undefined : onPointerMove}
+          onPointerDown={isTouch ? undefined : onPointerDown}
+          onPointerUp={isTouch ? undefined : () => setPressed(false)}
           value={context}
-          // on touch: pan-x pan-y lets the browser scroll the page outside the scrub zone
+          // on touch: pan-x pan-y — full scroll freedom, no JS interference
           // on desktop: pan-y only (horizontal stays in JS for bar scrubbing)
           style={{ height: "480px", touchAction: isTouch ? "pan-x pan-y" : "pan-y" }}
         >
