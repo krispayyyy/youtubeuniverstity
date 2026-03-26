@@ -938,7 +938,7 @@ function InfoNavRow({ label, icon, onClick }: { label: string; icon: React.React
 
 // ─── Info landing page ────────────────────────────────────────────────────────
 function InfoPageView() {
-  const goBack        = linkTo("YouTube University", "Polished grid");
+  const goBack        = linkTo("YouTube University", "Visualization");
   const goFAQ         = linkTo("YouTube University", "FAQ");
   const goMethodology = linkTo("YouTube University", "How We Calculate");
 
