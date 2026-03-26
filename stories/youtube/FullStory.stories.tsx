@@ -945,7 +945,7 @@ function InfoPageView() {
   return (
     <InfoPageShell>
       <InfoPageBackLink label="Visualization" onClick={goBack} />
-      <h2 className="select-none" style={{ fontSize: 36, color: "#fff", fontWeight: 400, margin: "8px 0 32px", lineHeight: 1.1 }}>Info</h2>
+      <h2 className="select-none" style={{ fontSize: 32, color: "#fff", fontWeight: 600, margin: "8px 0 32px", lineHeight: 1.1 }}>Info</h2>
       <div style={{ display: "flex", flexDirection: "column" }}>
         <InfoNavRow
           label="FAQ"
@@ -980,7 +980,7 @@ function FAQPageView() {
   return (
     <InfoPageShell>
       <InfoPageBackLink label="Info" onClick={goInfo} />
-      <h2 className="select-none" style={{ fontSize: 36, color: "#fff", fontWeight: 400, margin: "8px 0 40px", lineHeight: 1.1 }}>FAQ</h2>
+      <h2 className="select-none" style={{ fontSize: 32, color: "#fff", fontWeight: 600, margin: "8px 0 40px", lineHeight: 1.1 }}>FAQ</h2>
       {/* no top border on first item — only bottom borders throughout */}
       <div style={{ display: "flex", flexDirection: "column" }}>
         {FAQ_ITEMS.map((item, i) => (
@@ -998,7 +998,7 @@ function MethodologyPageView() {
   return (
     <InfoPageShell>
       <InfoPageBackLink label="Info" onClick={goInfo} />
-      <h2 className="select-none" style={{ fontSize: 36, color: "#fff", fontWeight: 400, margin: "0 0 8px", lineHeight: 1.1 }}>How we calculate</h2>
+      <h2 className="select-none" style={{ fontSize: 32, color: "#fff", fontWeight: 600, margin: "0 0 8px", lineHeight: 1.1 }}>How we calculate</h2>
       <p className="font-mono" style={{ fontSize: 12, color: "rgba(255,255,255,0.4)", lineHeight: 1.7, margin: "0 0 40px" }}>
         We'd love suggestions on how best to calculate these things, or if there are other items or data that would be valuable to track or represent.
       </p>
