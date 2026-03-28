@@ -818,19 +818,34 @@ function InfoPageShell({ children }: { children: React.ReactNode }) {
   );
 }
 
-// Small dark icon box — compact to match Membership reference proportions
+// Subtle rounded divider — replaces borderBottom so we can round the ends
+function RowDivider() {
+  return (
+    <div style={{
+      height: 1,
+      borderRadius: 999,
+      backgroundColor: "rgba(255,255,255,0.05)",
+      margin: "0 2px",
+    }} />
+  );
+}
+
+// Small dark icon box — uses same gradient fill + shadow as the pricing cards
 function InfoIconBox({ children, hovered }: { children: React.ReactNode; hovered?: boolean }) {
   return (
     <div style={{
       width: 32, height: 32,
-      backgroundColor: "var(--overlay-medium)",
-      border: "1px solid rgba(255,255,255,0.02)",
+      background: hovered
+        ? "#252321"
+        : "linear-gradient(175deg, rgba(255,255,255,0.05) 0%, rgba(0,0,0,0) 55%), #191614",
+      border: `1px solid ${hovered ? "rgba(255,255,255,0.18)" : "rgba(255,255,255,0.09)"}`,
+      boxShadow: "inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -2px 5px rgba(0,0,0,0.55), 0 0 0 0.5px rgba(255,255,255,0.04)",
+      transition: "background 0.15s ease, border-color 0.15s ease",
       borderRadius: 8,
       display: "flex", alignItems: "center", justifyContent: "center",
       flexShrink: 0,
-      // barely perceptible lift on hover — just enough to feel alive
       color: hovered ? "rgba(255,255,255,0.7)" : "rgba(255,255,255,0.45)",
-      transition: "color 0.12s ease",
+      transition: "background 0.15s ease, border-color 0.15s ease, color 0.12s ease",
     }}>
       {children}
     </div>
@@ -842,8 +857,7 @@ function AccordionRow({ label, body, isLast }: { label: string; body: string; is
   const [open, setOpen] = React.useState(false);
   const [hovered, setHovered] = React.useState(false);
   return (
-    // separator stays at column width; button bleeds past it on hover
-    <div style={{ borderBottom: isLast ? "none" : "1px solid var(--overlay-medium)" }}>
+    <div>
       <button
         onClick={() => setOpen(v => !v)}
         onMouseEnter={() => setHovered(true)}
@@ -905,6 +919,7 @@ function AccordionRow({ label, body, isLast }: { label: string; body: string; is
           </motion.div>
         )}
       </AnimatePresence>
+      {!isLast && <RowDivider />}
     </div>
   );
 }
@@ -913,8 +928,7 @@ function AccordionRow({ label, body, isLast }: { label: string; body: string; is
 function InfoNavRow({ label, icon, onClick }: { label: string; icon: React.ReactNode; onClick: () => void }) {
   const [hovered, setHovered] = React.useState(false);
   return (
-    // only bottom border — no top border on any row (Membership convention)
-    <div style={{ borderBottom: "1px solid var(--overlay-medium)" }}>
+    <div>
       <button
         onClick={onClick}
         onMouseEnter={() => setHovered(true)}
@@ -932,7 +946,6 @@ function InfoNavRow({ label, icon, onClick }: { label: string; icon: React.React
       >
         <InfoIconBox hovered={hovered}>{icon}</InfoIconBox>
         <span className="font-mono" style={{ fontSize: 15, letterSpacing: "-0.01em", fontWeight: 500, flex: 1, textAlign: "left", color: "#fff" }}>{label}</span>
-        {/* motion.svg: nudges 4px right on hover, springs back to neutral on leave */}
         <motion.svg
           animate={{ x: hovered ? 1 : 0 }}
           transition={{ type: "spring", stiffness: 400, damping: 30 }}
@@ -944,6 +957,7 @@ function InfoNavRow({ label, icon, onClick }: { label: string; icon: React.React
           <polyline points="4 2 8 6 4 10" />
         </motion.svg>
       </button>
+      <RowDivider />
     </div>
   );
 }
