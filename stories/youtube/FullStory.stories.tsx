@@ -3002,7 +3002,7 @@ function GridView() {
         <GridCard delay={0.47} style={{ gridColumn: "1 / 3", gridRow: "5", overflow: "hidden" }}>
           <div style={{ position: "relative", height: "100%", overflow: "hidden" }}>
             <video
-              src="./character.mp4"
+              src="https://pub-53930e9a5ab94f018a9f8c1509ea8e27.r2.dev/Avatar1.mp4"
               poster="/charcterim.png"
               loop
               muted

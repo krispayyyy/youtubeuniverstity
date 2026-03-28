@@ -1813,9 +1813,9 @@ export function TopChannelPicksModal({
 // ─── Late Night Learning Modal ────────────────────────────────────────────────
 
 export const LATE_NIGHT_PERSONAS = [
-  { id: "male",   avatarSrc: "./avatars/character1.png", videoSrc: "./character.mp4", easterEgg: false },
-  { id: "female", avatarSrc: "./avatars/character2.png", videoSrc: "./vid2.mp4",      easterEgg: false },
-  { id: "wild",   avatarSrc: "./avatars/character3.png", videoSrc: "./vid3.mp4",      easterEgg: true  },
+  { id: "male",   avatarSrc: "./avatars/character1.png", videoSrc: "https://pub-53930e9a5ab94f018a9f8c1509ea8e27.r2.dev/Avatar1.mp4", easterEgg: false },
+  { id: "female", avatarSrc: "./avatars/character2.png", videoSrc: "https://pub-53930e9a5ab94f018a9f8c1509ea8e27.r2.dev/Avatar2.mp4",      easterEgg: false },
+  { id: "wild",   avatarSrc: "./avatars/character3.png", videoSrc: "https://pub-53930e9a5ab94f018a9f8c1509ea8e27.r2.dev/Avatar3.mp4",      easterEgg: true  },
 ];
 
 // All three personas shown — Avatar 3 is the Easter egg bonus
