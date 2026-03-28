@@ -961,6 +961,18 @@ function InfoNavRow({ label, icon, onClick }: { label: string; icon: React.React
   );
 }
 
+// ─── Page entrance animation ──────────────────────────────────────────────────
+// stagger: each item slides up 6px and fades in, delayed by its position index
+// duration ↓ → snappier (try 0.18s), duration ↑ → slower reveal (try 0.4s)
+// delay spacing ↓ → tighter choreography (try 0.04), ↑ → more theatrical (try 0.1)
+function pi(delay: number) {
+  return {
+    initial: { opacity: 0, y: 6 },
+    animate: { opacity: 1, y: 0 },
+    transition: { duration: 0.28, ease: "easeOut" as const, delay },
+  };
+}
+
 // ─── Info landing page ────────────────────────────────────────────────────────
 function InfoPageView() {
   const goBack        = linkTo("YouTube University", "Visualization");
@@ -971,23 +983,19 @@ function InfoPageView() {
   return (
     <InfoPageShell>
       <InfoPageBackLink label="Visualization" onClick={goBack} />
-      <h2 className="select-none" style={{ fontSize: 32, color: "#fff", fontWeight: 600, margin: "8px 0 32px", lineHeight: 1.1 }}>Info</h2>
+      {/* title: first content element, enters immediately */}
+      <motion.h2 {...pi(0)} className="select-none" style={{ fontSize: 32, color: "#fff", fontWeight: 600, margin: "8px 0 32px", lineHeight: 1.1 }}>Info</motion.h2>
       <div style={{ display: "flex", flexDirection: "column" }}>
-        <InfoNavRow
-          label="FAQ"
-          onClick={goFAQ}
-          icon={<BookTextIcon size={14} />}
-        />
-        <InfoNavRow
-          label="Interview agents"
-          onClick={goAgents}
-          icon={<ZapIcon size={14} />}
-        />
-        <InfoNavRow
-          label="How we calculate"
-          onClick={goMethodology}
-          icon={<CompassIcon size={14} />}
-        />
+        {/* stagger: each row enters 60ms after the previous */}
+        {[
+          { label: "FAQ", onClick: goFAQ, icon: <BookTextIcon size={14} /> },
+          { label: "Interview agents", onClick: goAgents, icon: <ZapIcon size={14} /> },
+          { label: "How we calculate", onClick: goMethodology, icon: <CompassIcon size={14} /> },
+        ].map((row, i) => (
+          <motion.div key={row.label} {...pi(0.08 + i * 0.06)}>
+            <InfoNavRow label={row.label} onClick={row.onClick} icon={row.icon} />
+          </motion.div>
+        ))}
       </div>
     </InfoPageShell>
   );
@@ -1000,15 +1008,16 @@ function FAQPageView() {
   return (
     <InfoPageShell>
       <InfoPageBackLink label="Info" onClick={goInfo} />
-      <h2 className="select-none" style={{ fontSize: 32, color: "#fff", fontWeight: 600, margin: "8px 0 12px", lineHeight: 1.1 }}>FAQ</h2>
-      <p style={{ fontSize: 13, color: "rgba(255,255,255,0.38)", lineHeight: 1.65, margin: "0 0 40px", maxWidth: 440 }}>
+      <motion.h2 {...pi(0)} className="select-none" style={{ fontSize: 32, color: "#fff", fontWeight: 600, margin: "8px 0 12px", lineHeight: 1.1 }}>FAQ</motion.h2>
+      <motion.p {...pi(0.07)} style={{ fontSize: 13, color: "rgba(255,255,255,0.38)", lineHeight: 1.65, margin: "0 0 40px", maxWidth: 440 }}>
         For any questions, please email{" "}
         <a href="mailto:karimsaleh.design@gmail.com" style={{ color: "rgba(220,214,208,0.60)", textDecoration: "none" }}>karimsaleh.design@gmail.com</a>
-      </p>
-      {/* no top border on first item — only bottom borders throughout */}
+      </motion.p>
       <div style={{ display: "flex", flexDirection: "column" }}>
         {FAQ_ITEMS.map((item, i) => (
-          <AccordionRow key={i} label={item.q} body={item.a} isLast={i === FAQ_ITEMS.length - 1} />
+          <motion.div key={i} {...pi(0.14 + i * 0.06)}>
+            <AccordionRow label={item.q} body={item.a} isLast={i === FAQ_ITEMS.length - 1} />
+          </motion.div>
         ))}
       </div>
     </InfoPageShell>
@@ -1022,14 +1031,15 @@ function MethodologyPageView() {
   return (
     <InfoPageShell>
       <InfoPageBackLink label="Info" onClick={goInfo} />
-      <h2 className="select-none" style={{ fontSize: 32, color: "#fff", fontWeight: 600, margin: "0 0 8px", lineHeight: 1.1 }}>How we calculate</h2>
-      <p className="font-mono" style={{ fontSize: 12, color: "rgba(255,255,255,0.4)", lineHeight: 1.7, margin: "0 0 40px" }}>
+      <motion.h2 {...pi(0)} className="select-none" style={{ fontSize: 32, color: "#fff", fontWeight: 600, margin: "0 0 8px", lineHeight: 1.1 }}>How we calculate</motion.h2>
+      <motion.p {...pi(0.07)} className="font-mono" style={{ fontSize: 12, color: "rgba(255,255,255,0.4)", lineHeight: 1.7, margin: "0 0 40px" }}>
         We'd love suggestions on how best to calculate these things, or if there are other items or data that would be valuable to track or represent.
-      </p>
-      {/* no top border on first item — only bottom borders throughout */}
+      </motion.p>
       <div style={{ display: "flex", flexDirection: "column" }}>
         {METHODOLOGY_ITEMS.map((item, i) => (
-          <AccordionRow key={i} label={item.label} body={item.detail} isLast={i === METHODOLOGY_ITEMS.length - 1} />
+          <motion.div key={i} {...pi(0.14 + i * 0.06)}>
+            <AccordionRow label={item.label} body={item.detail} isLast={i === METHODOLOGY_ITEMS.length - 1} />
+          </motion.div>
         ))}
       </div>
     </InfoPageShell>
@@ -1132,31 +1142,23 @@ function InterviewAgentsView() {
     <div style={{ backgroundColor: "#0d0c0b", minHeight: "100vh", color: "#fff", overflowY: "auto" }}>
       <div style={{ maxWidth: PAGE_MAX_W, margin: "0 auto", padding: isMobile ? "32px 20px 60px" : "48px 40px 80px" }}>
         <InfoPageBackLink label="Info" onClick={goInfo} />
-        <h2 style={{ fontSize: 32, color: "rgba(220,214,208,0.92)", fontWeight: 600, letterSpacing: "-0.02em", margin: "8px 0 12px", lineHeight: 1.1 }}>
+        <motion.h2 {...pi(0)} style={{ fontSize: 32, color: "rgba(220,214,208,0.92)", fontWeight: 600, letterSpacing: "-0.02em", margin: "8px 0 12px", lineHeight: 1.1 }}>
           Interview agents.
-        </h2>
-        <p className="font-mono" style={{ fontSize: 13, color: "rgba(255,255,255,0.40)", lineHeight: 1.65, margin: "0 0 48px", maxWidth: 480 }}>
+        </motion.h2>
+        <motion.p {...pi(0.07)} className="font-mono" style={{ fontSize: 13, color: "rgba(255,255,255,0.40)", lineHeight: 1.65, margin: "0 0 48px", maxWidth: 480 }}>
           Prep for your interview — communication style, answer depth, and feedback on every answer — designed to help you expand your thinking.
-        </p>
+        </motion.p>
+        {/* stagger: cards enter one after another — wider gap (80ms) suits their visual weight */}
         <div style={{ display: "grid", gridTemplateColumns: `repeat(${cols}, 1fr)`, gap: 12, alignItems: "stretch" }}>
-          <PricingCard
-            name="Whiteboarding"
-            description="Define your frameworks, get expansive feedback, and practice in real-time — the way a real session runs."
-            price="Free"
-            features={["A codified framework", "Expansive live feedback", "Practice and feedback mode", "Session memory and tuning"]}
-          />
-          <PricingCard
-            name="App critique"
-            description="Trained by designers from Stripe, Shopify, and Google. Learn the frameworks that make critique actually land."
-            price="$5"
-            features={["Critique frameworks from Stripe, Shopify, and Google", "Feedback on language", "Focus areas", "Memorable moments"]}
-          />
-          <PricingCard
-            name="Course framework"
-            description="Point it at any design course. It turns into a mentor — applying the learnings autonomously as you design."
-            price="$20"
-            features={["Any course, any format", "Mentor built from source material", "Applies learnings as you work", "Gets sharper over time"]}
-          />
+          {[
+            { name: "Whiteboarding", description: "Define your frameworks, get expansive feedback, and practice in real-time — the way a real session runs.", price: "Free", features: ["A codified framework", "Expansive live feedback", "Practice and feedback mode", "Session memory and tuning"] },
+            { name: "App critique", description: "Trained by designers from Stripe, Shopify, and Google. Learn the frameworks that make critique actually land.", price: "$5", features: ["Critique frameworks from Stripe, Shopify, and Google", "Feedback on language", "Focus areas", "Memorable moments"] },
+            { name: "Course framework", description: "Point it at any design course. It turns into a mentor — applying the learnings autonomously as you design.", price: "$20", features: ["Any course, any format", "Mentor built from source material", "Applies learnings as you work", "Gets sharper over time"] },
+          ].map((card, i) => (
+            <motion.div key={card.name} {...pi(0.14 + i * 0.08)} style={{ display: "flex" }}>
+              <PricingCard {...card} />
+            </motion.div>
+          ))}
         </div>
       </div>
     </div>

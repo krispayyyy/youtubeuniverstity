@@ -677,7 +677,6 @@ export function GrowthTickerModal({
 
           <div
             style={{
-              borderTop: "1px solid var(--overlay-medium)",
               paddingTop: 16,
               marginTop: 4,
               display: "flex",
