@@ -1550,7 +1550,7 @@ function ModalHeroVideo({ src, onFailed }: { src: string; onFailed?: () => void 
     <div
       style={{
         width: "100%",
-        aspectRatio: "4 / 3",
+        height: 290,
         overflow: "hidden",
         position: "relative",
         backgroundColor: "#0a0a0a",
@@ -1562,7 +1562,8 @@ function ModalHeroVideo({ src, onFailed }: { src: string; onFailed?: () => void 
         muted
         playsInline
         autoPlay
-        preload="metadata"
+        loop
+        preload="auto"
         aria-label="Channel highlight"
         onError={() => onFailed?.()}
         style={{
@@ -1911,7 +1912,7 @@ export function LateNightLearningModal({
                   // key forces remount (and re-autoplay) when persona switches
                   <ModalHeroVideo key={activePersona} src={persona.videoSrc} onFailed={() => setHeroVideoFailed(true)} />
                 ) : (
-                  <div style={{ width: "100%", aspectRatio: "4 / 3", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <div style={{ width: "100%", height: 290, display: "flex", alignItems: "center", justifyContent: "center" }}>
                     <span className="font-mono select-none" style={{ fontSize: 9, color: "rgba(255,255,255,0.20)", letterSpacing: "0.14em", textTransform: "uppercase" }}>
                       Video coming soon
                     </span>
@@ -1936,7 +1937,6 @@ export function LateNightLearningModal({
                   <button
                     key={p.id}
                     type="button"
-                    onMouseEnter={() => handlePersonaChange(idx)}
                     onClick={() => handlePersonaChange(idx)}
                     style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8, background: "none", border: "none", cursor: "pointer", padding: 0, outline: "none" }}
                   >

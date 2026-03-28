@@ -4061,7 +4061,7 @@ function MainGridView({ ginnMode = false, accentColor = "#E95F38" }: { ginnMode?
   const [groupSplit, setGroupSplit]         = React.useState(0.5);
   const [colSplitLeft, setColSplitLeft]     = React.useState(0.5);
   const [colSplitRight, setColSplitRight]   = React.useState(0.5);
-  const [leftRowH, setLeftRowH]             = React.useState([200, 340, 200]);
+  const [leftRowH, setLeftRowH]             = React.useState([200, 260, 180]);
   const [rightRowH, setRightRowH]           = React.useState([200, 200, 240]);
 
   const MIN_GRP = 0.28; const MAX_GRP = 0.72;
