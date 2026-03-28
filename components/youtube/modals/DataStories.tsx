@@ -1842,6 +1842,8 @@ export function LateNightLearningModal({
     return () => window.removeEventListener("keydown", onKey);
   }, [onClose]);
 
+  const [hoveredPersona, setHoveredPersona] = React.useState<number | null>(null);
+
   const handlePersonaChange = (idx: number) => {
     onPersonaChange(idx);
     // reset failed state so the new persona's video gets a fresh attempt
@@ -1938,6 +1940,8 @@ export function LateNightLearningModal({
                     key={p.id}
                     type="button"
                     onClick={() => handlePersonaChange(idx)}
+                    onMouseEnter={() => setHoveredPersona(idx)}
+                    onMouseLeave={() => setHoveredPersona(null)}
                     style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8, background: "none", border: "none", cursor: "pointer", padding: 0, outline: "none" }}
                   >
                     <div
@@ -1946,17 +1950,20 @@ export function LateNightLearningModal({
                         height: 64,
                         borderRadius: "50%",
                         overflow: "hidden",
-                        // ring: active = crisp border (white on dark, dark on light), inactive = barely-there
+                        // ring: active = bright, hovered = mid, inactive = barely-there
                         border: isActive
                           ? isDark ? "2px solid rgba(255,255,255,0.9)" : "2px solid rgba(0,0,0,0.30)"
-                          : isDark ? "2px solid rgba(255,255,255,0.12)" : "2px solid rgba(0,0,0,0.08)",
-                        // active shadow: heavy on dark, restrained on light
+                          : hoveredPersona === idx
+                            ? isDark ? "2px solid rgba(255,255,255,0.40)" : "2px solid rgba(0,0,0,0.18)"
+                            : isDark ? "2px solid rgba(255,255,255,0.12)" : "2px solid rgba(0,0,0,0.08)",
                         boxShadow: isActive
                           ? isDark
                             ? "0 0 0 3px rgba(255,255,255,0.14), 0 8px 20px rgba(0,0,0,0.55)"
                             : "0 0 0 3px rgba(0,0,0,0.06), 0 2px 8px rgba(0,0,0,0.12)"
                           : "none",
                         transition: "border-color 0.18s ease, box-shadow 0.18s ease",
+                        // opacity: dim inactive, brighten on hover, full on active
+                        opacity: isActive ? 1 : hoveredPersona === idx ? 0.85 : 0.55,
                       }}
                     >
                       <img src={p.avatarSrc} alt="Avatar" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
