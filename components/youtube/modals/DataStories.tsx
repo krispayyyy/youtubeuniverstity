@@ -1550,7 +1550,7 @@ function ModalHeroVideo({ src, onFailed }: { src: string; onFailed?: () => void 
     <div
       style={{
         width: "100%",
-        aspectRatio: "16 / 9",
+        aspectRatio: "4 / 3",
         overflow: "hidden",
         position: "relative",
         backgroundColor: "#0a0a0a",
@@ -1665,7 +1665,7 @@ export function TopChannelPicksModal({
                     <div
                       style={{
                         width: "100%",
-                        aspectRatio: "16 / 9",
+                        aspectRatio: "4 / 3",
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
@@ -1886,6 +1886,13 @@ export function LateNightLearningModal({
             <button onClick={onClose} style={MODAL_CLOSE_BTN_STYLE}>×</button>
           </div>
 
+          {/* Preload all persona videos so switching is instant */}
+          <div style={{ display: "none" }} aria-hidden>
+            {LATE_NIGHT_PERSONAS.map(p => (
+              <video key={p.id} src={p.videoSrc} preload="auto" muted playsInline />
+            ))}
+          </div>
+
           {/* Hero video — padded frame (top / left / right) */}
           <div style={{ padding: "20px 24px 0" }}>
             <div style={{ position: "relative" }}>
@@ -1904,7 +1911,7 @@ export function LateNightLearningModal({
                   // key forces remount (and re-autoplay) when persona switches
                   <ModalHeroVideo key={activePersona} src={persona.videoSrc} onFailed={() => setHeroVideoFailed(true)} />
                 ) : (
-                  <div style={{ width: "100%", aspectRatio: "16 / 9", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <div style={{ width: "100%", aspectRatio: "4 / 3", display: "flex", alignItems: "center", justifyContent: "center" }}>
                     <span className="font-mono select-none" style={{ fontSize: 9, color: "rgba(255,255,255,0.20)", letterSpacing: "0.14em", textTransform: "uppercase" }}>
                       Video coming soon
                     </span>
@@ -1929,6 +1936,7 @@ export function LateNightLearningModal({
                   <button
                     key={p.id}
                     type="button"
+                    onMouseEnter={() => handlePersonaChange(idx)}
                     onClick={() => handlePersonaChange(idx)}
                     style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8, background: "none", border: "none", cursor: "pointer", padding: 0, outline: "none" }}
                   >
