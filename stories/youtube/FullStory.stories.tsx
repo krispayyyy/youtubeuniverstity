@@ -977,12 +977,7 @@ function InfoPageView() {
         <InfoNavRow
           label="FAQ"
           onClick={goFAQ}
-          icon={
-            <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M5.5 5.5c0-1.4 1.1-2.5 2.5-2.5s2.5 1.1 2.5 2.5c0 1.2-.9 2-1.8 2.5-.4.2-.7.7-.7 1.2v.3" />
-              <circle cx="8" cy="13" r="0.6" fill="currentColor" stroke="none" />
-            </svg>
-          }
+          icon={<BookTextIcon size={14} />}
         />
         <InfoNavRow
           label="Interview agents"
@@ -992,13 +987,7 @@ function InfoPageView() {
         <InfoNavRow
           label="How we calculate"
           onClick={goMethodology}
-          icon={
-            <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="4.5" cy="4.5" r="1.75" />
-              <circle cx="11.5" cy="11.5" r="1.75" />
-              <line x1="13" y1="3" x2="3" y2="13" />
-            </svg>
-          }
+          icon={<CompassIcon size={14} />}
         />
       </div>
     </InfoPageShell>
