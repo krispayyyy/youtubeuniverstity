@@ -1036,8 +1036,9 @@ function MethodologyPageView() {
         We'd love suggestions on how best to calculate these things, or if there are other items or data that would be valuable to track or represent.
       </motion.p>
       <div style={{ display: "flex", flexDirection: "column" }}>
+        {/* stagger shrinks proportionally so total list animation stays ~0.30s regardless of item count */}
         {METHODOLOGY_ITEMS.map((item, i) => (
-          <motion.div key={i} {...pi(0.14 + i * 0.06)}>
+          <motion.div key={i} {...pi(0.14 + i * Math.min(0.06, 0.30 / METHODOLOGY_ITEMS.length))}>
             <AccordionRow label={item.label} body={item.detail} isLast={i === METHODOLOGY_ITEMS.length - 1} />
           </motion.div>
         ))}
