@@ -2584,7 +2584,7 @@ export function SubscriptionsCardInner({ onOpen, stats: statsArg }: { onOpen: ()
             {statsArg.totalSubscriptions}
           </span>
           <span className="font-mono select-none" style={{ fontSize: 11, color: "var(--text-faint)", letterSpacing: "0.02em" }}>
-            / subs
+            channels
           </span>
         </div>
       </div>

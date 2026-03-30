@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { motion, AnimatePresence, useSpring, useMotionValue, animate, type MotionValue } from "framer-motion";
+import { motion, AnimatePresence, useSpring, useMotionValue, useMotionValueEvent, animate, type MotionValue } from "framer-motion";
 import {
   useProximity,
   useMouseX,
@@ -12,6 +12,9 @@ import {
 } from "@/components/line-minimap";
 import GlassSurface from "@/components/ui/glass-surface";
 import { ElevatedSection } from "@/components/ui/elevated-section";
+import { useSound } from "@/components/use-sound";
+
+const SOUND_OPTIONS = { volume: 0.3 };
 
 // ─── Drag constants (mirroring CareerTuner for consistency) ──────────────────
 // snap spring: what the pill springs back to after release
@@ -36,8 +39,11 @@ function dampen(val: number, [min, max]: [number, number], factor = 2): number {
 
 // ─── Meta ─────────────────────────────────────────────────────────────────────
 
-// Meta removed — this file only exports components used by FullStory.
-// No Storybook stories are registered from this file.
+const meta: Meta = {
+  title: "Youtube / EnjProgress",
+};
+export default meta;
+type Story = StoryObj;
 
 // ─── Progress Pill ────────────────────────────────────────────────────────────
 // Exported so grid cards can place it in their own header row (top-right, like # in LongestStreak)
@@ -94,9 +100,9 @@ export function ProgressPill({ progress }: { progress: number }) {
 
 // ─── Config ───────────────────────────────────────────────────────────────────
 
-const TICK_COUNT = 120;
-// Major tick every 7th — matches the Figma ruler pattern (1 tall + 6 short per group)
-const MAJOR_INTERVAL = 7;
+const TICK_COUNT = 85;
+// Major tick every 4th — gives exactly 22 major ticks to match the 22 checklist items
+const MAJOR_INTERVAL = 4;
 // Tick heights sourced from Figma (major: 70px → scaled down, minor: 52px → scaled down)
 const TICK_HEIGHT_MAJOR = LINE_HEIGHT_ACTIVE; // 32px — tall, bright
 const TICK_HEIGHT_MINOR = LINE_HEIGHT;        // 24px — short, dim
@@ -119,6 +125,8 @@ function Tick({
 }) {
   const ref = React.useRef<HTMLDivElement>(null);
   const scaleY = useSpring(1, { damping: 45, stiffness: 600 });
+  // Proximity-driven orange tint for major ticks: 0 at rest → 1 when cursor is right on it
+  const orangeTint = useSpring(0, { damping: 35, stiffness: 400 });
   const scrollX = useMotionValue(0);
 
   useProximity(scaleY, {
@@ -129,27 +137,51 @@ function Tick({
     centerX: 0,
   });
 
+  // Drive orange tint from cursor distance (major completed ticks only)
+  useMotionValueEvent(mouseX, "change", (latest) => {
+    if (disabled || !isMajor || !ref.current) { orangeTint.set(0); return; }
+    const rect = ref.current.getBoundingClientRect();
+    const center = rect.left + rect.width / 2;
+    const dist = Math.abs(latest - center);
+    const RADIUS = 40;
+    orangeTint.set(dist < RADIUS ? 1 - dist / RADIUS : 0);
+  });
+
+  // Base color (white/gray) for the tick
+  const baseColor = disabled
+    ? isMajor ? "var(--tick-major-disabled)" : "var(--tick-minor-disabled)"
+    : isMajor
+      ? cardHovered ? "var(--tick-major-hover)" : "var(--tick-major-rest)"
+      : cardHovered ? "var(--tick-minor-hover)" : "var(--tick-minor-rest)";
+
   return (
     <motion.div
       ref={ref}
       style={{
-        width: LINE_WIDTH,
+        position: "relative",
+        width: isMajor ? 2 : LINE_WIDTH,
         height: isMajor ? TICK_HEIGHT_MAJOR : TICK_HEIGHT_MINOR,
-        backgroundColor: disabled
-          // future ticks: very faint, no hover response
-          ? isMajor ? "var(--tick-major-disabled)" : "var(--tick-minor-disabled)"
-          // completed ticks: normal hover behaviour
-          : isMajor
-            ? cardHovered ? "var(--tick-major-hover)" : "var(--tick-major-rest)"
-            : cardHovered ? "var(--tick-minor-hover)" : "var(--tick-minor-rest)",
+        backgroundColor: baseColor,
         transition: "background-color 0.15s ease",
-        // disabled ticks stay at scale 1 — proximity scale only applies to completed region
         scaleY: disabled ? 1 : scaleY,
         transformOrigin: "center",
         flexShrink: 0,
         pointerEvents: disabled ? "none" : "auto",
+        overflow: "hidden",
       }}
-    />
+    >
+      {/* Orange overlay — opacity driven by cursor proximity */}
+      {isMajor && !disabled && (
+        <motion.div
+          style={{
+            position: "absolute",
+            inset: 0,
+            backgroundColor: "var(--accent, var(--color-orange, #E14920))",
+            opacity: orangeTint,
+          }}
+        />
+      )}
+    </motion.div>
   );
 }
 
@@ -184,7 +216,7 @@ export const DEFAULT_GLASS: GlassConfig = {
   greenOffset: 10,
   blueOffset: 14,
   orangeTint: 0.53,
-  pillWidth: 28,
+  pillWidth: 32,
   heightBonus: 47,
   borderRadius: 8,
   rimOpacity: 0.10,
@@ -396,6 +428,7 @@ export function EnjProgress({
   showFooter = true,
   hideLabel = false,
   hovered = false,
+  onCursorFraction,
 }: {
   progress?: number;
   glass?: GlassConfig;
@@ -407,10 +440,40 @@ export function EnjProgress({
   hideLabel?: boolean;
   /** Card hover state — brightens the label text to match other grid card conventions */
   hovered?: boolean;
+  /** Reports cursor position as 0–1 fraction on the ruler (null when cursor leaves) */
+  onCursorFraction?: (fraction: number | null) => void;
 }) {
   const { mouseX, onMouseMove, onMouseLeave } = useMouseX();
-  // rulerRef: passed to ProgressIndicator so drag can measure ruler width for bounds
   const rulerRef = React.useRef<HTMLDivElement>(null);
+
+  // Sound — tick on major tick boundary crossings, same volume as line graph scrub
+  const tick = useSound("/sounds/tick.mp3", SOUND_OPTIONS);
+
+  // Fire at every half-tick distance for rapid-fire sound matching the line graph density
+  const lastHalfTickIdx = React.useRef<number | null>(null);
+
+  const handlePointerMove = React.useCallback((e: React.PointerEvent) => {
+    onMouseMove(e);
+    if (rulerRef.current) {
+      const rect = rulerRef.current.getBoundingClientRect();
+      const fraction = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+      onCursorFraction?.(fraction);
+
+      // 4x tick count = fire every quarter-tick step for dense rapid-fire sound
+      // Only play in the active (completed) region — not on disabled ticks
+      const halfTickIdx = Math.round(fraction * (TICK_COUNT - 1) * 4);
+      if (lastHalfTickIdx.current !== null && halfTickIdx !== lastHalfTickIdx.current && fraction <= progress) {
+        tick?.();
+      }
+      lastHalfTickIdx.current = halfTickIdx;
+    }
+  }, [onMouseMove, onCursorFraction, tick]);
+
+  const handlePointerLeave = React.useCallback((e: React.PointerEvent) => {
+    onMouseLeave(e);
+    onCursorFraction?.(null);
+    lastHalfTickIdx.current = null;
+  }, [onMouseLeave, onCursorFraction]);
 
   return (
     <div style={{ width: "100%", display: "flex", flexDirection: "column", gap: 12 }}>
@@ -428,7 +491,7 @@ export function EnjProgress({
               transition: "color 0.15s ease",
             }}
           >
-            {label ?? `Design engineer progress (${Math.round(progress * 22)}/22)`}
+            {label ?? `Design engineer progress (${Math.round(progress * CHECKLIST_ITEMS.length)}/${CHECKLIST_ITEMS.length})`}
           </span>
           <ProgressPill progress={progress} />
         </div>
@@ -438,8 +501,8 @@ export function EnjProgress({
       <div
         ref={rulerRef}
         style={{ position: "relative", width: "100%" }}
-        onPointerMove={onMouseMove}
-        onPointerLeave={onMouseLeave}
+        onPointerMove={handlePointerMove}
+        onPointerLeave={handlePointerLeave}
       >
         {/* Ticks */}
         <div
@@ -683,30 +746,30 @@ function TunerSlider({ label, value, min, max, step = 1, onChange }: {
 
 const CHECKLIST_ITEMS: { text: string; phase: "designer" | "hybrid" | "engineer" }[] = [
   // ── Designer foundations ──────────────────────────────────────────────────
-  { text: "built a responsive layout with HTML & CSS — no copy-paste",   phase: "designer" },
-  { text: "translated a Figma component to code with pixel accuracy",    phase: "designer" },
-  { text: "made a page interactive with vanilla JavaScript",             phase: "designer" },
-  { text: "shipped a full page with Tailwind from a blank file",         phase: "designer" },
-  { text: "deployed a project to a live URL for the first time",         phase: "designer" },
-  { text: "managed a codebase across time — commits, branches, no file chaos", phase: "designer" },
+  { text: "Built a responsive layout with HTML & CSS — no copy-paste",   phase: "designer" },
+  { text: "Translated a Figma component to code with pixel accuracy",    phase: "designer" },
+  { text: "Made a page interactive with vanilla JavaScript",             phase: "designer" },
+  { text: "Shipped a full page with Tailwind from a blank file",         phase: "designer" },
+  { text: "Deployed a project to a live URL for the first time",         phase: "designer" },
+  { text: "Managed a codebase across time — commits, branches, no file chaos", phase: "designer" },
   // ── Builder skills ────────────────────────────────────────────────────────
-  { text: "built a React component without following a tutorial",        phase: "hybrid"   },
-  { text: "composed multiple components into a page that shipped",       phase: "hybrid"   },
-  { text: "fetched real data from an API and put it on screen",          phase: "hybrid"   },
-  { text: "typed a component with TypeScript and caught a real bug",     phase: "hybrid"   },
-  { text: "implemented an animation you designed — not one from a demo", phase: "hybrid"   },
-  { text: "wrote a custom hook to share logic across components",        phase: "hybrid"   },
-  { text: "debugged a broken layout in a codebase that wasn't yours",    phase: "hybrid"   },
-  { text: "used an AI coding tool to ship something you couldn't have shipped alone", phase: "hybrid"   },
-  { text: "owned a feature from Figma frame to deployed URL",            phase: "hybrid"   },
+  { text: "Built a React component without following a tutorial",        phase: "hybrid"   },
+  { text: "Composed multiple components into a page that shipped",       phase: "hybrid"   },
+  { text: "Fetched real data from an API and put it on screen",          phase: "hybrid"   },
+  { text: "Typed a component with TypeScript and caught a real bug",     phase: "hybrid"   },
+  { text: "Implemented an animation you designed — not one from a demo", phase: "hybrid"   },
+  { text: "Wrote a custom hook to share logic across components",        phase: "hybrid"   },
+  { text: "Debugged a broken layout in a codebase that wasn't yours",    phase: "hybrid"   },
+  { text: "Used an AI coding tool to ship something you couldn't have shipped alone", phase: "hybrid"   },
+  { text: "Owned a feature from Figma frame to deployed URL",            phase: "hybrid"   },
   // ── Engineer mindset ──────────────────────────────────────────────────────
-  { text: "built or extended a design system with real tokens",          phase: "engineer" },
-  { text: "made a meaningful performance improvement on something live", phase: "engineer" },
-  { text: "got a PR merged into someone else's codebase",                phase: "engineer" },
-  { text: "shipped accessible components — a11y from the start, not an afterthought", phase: "engineer" },
-  { text: "made a design decision under engineering constraints — and shipped it", phase: "engineer" },
-  { text: "had someone ask \"who designed that?\" and \"who built that?\" — same thing", phase: "engineer" },
-  { text: "introduced yourself as a design engineer without hesitating", phase: "engineer" },
+  { text: "Built or extended a design system with real tokens",          phase: "engineer" },
+  { text: "Made a meaningful performance improvement on something live", phase: "engineer" },
+  { text: "Got a PR merged into someone else's codebase",                phase: "engineer" },
+  { text: "Shipped accessible components — a11y from the start, not an afterthought", phase: "engineer" },
+  { text: "Made a design decision under engineering constraints — and shipped it", phase: "engineer" },
+  { text: "Had someone ask \"who designed that?\" and \"who built that?\" — same thing", phase: "engineer" },
+  { text: "Introduced yourself as a design engineer without hesitating", phase: "engineer" },
 ];
 
 function getCheckedCount(progress: number): number {
@@ -965,7 +1028,7 @@ export function ChecklistModal1({ progress, onClose }: { progress: number; onClo
                     </svg>
                   )}
                 </motion.div>
-                <span className="font-mono select-none" style={{ fontSize: 11, letterSpacing: "0.03em", color: checked ? "var(--text-faint)" : "var(--text-secondary)", textDecoration: checked ? "line-through" : "none" }}>
+                <span className="font-mono select-none" style={{ fontSize: 11, letterSpacing: "0.03em", color: checked ? "var(--text-faint)" : "var(--text-secondary)", textDecoration: checked ? "line-through" : "none", textDecorationColor: checked ? "rgba(220, 214, 208, 0.32)" : undefined, opacity: checked ? 0.7 : 1 }}>
                   {item.text}
                 </span>
               </motion.div>
@@ -994,7 +1057,7 @@ export function ChecklistModal1({ progress, onClose }: { progress: number; onClo
                   </svg>
                 )}
               </div>
-              <span className="font-mono select-none" style={{ fontSize: 11, letterSpacing: "0.03em", color: item.checked ? "var(--text-faint)" : "var(--text-secondary)", textDecoration: item.checked ? "line-through" : "none" }}>
+              <span className="font-mono select-none" style={{ fontSize: 11, letterSpacing: "0.03em", color: item.checked ? "var(--text-faint)" : "var(--text-secondary)", textDecoration: item.checked ? "line-through" : "none", textDecorationColor: item.checked ? "rgba(220, 214, 208, 0.32)" : undefined, opacity: item.checked ? 0.7 : 1 }}>
                 {item.text}
               </span>
             </motion.div>
@@ -1123,6 +1186,8 @@ function ChecklistModal2({ progress, onClose }: { progress: number; onClose: () 
                     fontStyle: checked ? "normal" : "italic",
                     color: checked ? "var(--text-faint)" : "var(--text-secondary)",
                     textDecoration: checked ? "line-through" : "none",
+                    textDecorationColor: checked ? "rgba(220, 214, 208, 0.32)" : undefined,
+                    opacity: checked ? 0.7 : 1,
                     letterSpacing: checked ? "0" : "0.01em",
                   }}
                 >
@@ -1250,6 +1315,8 @@ function ChecklistModal3({ progress, onClose }: { progress: number; onClose: () 
                           fontSize: 11, letterSpacing: "0.03em",
                           color: checked ? "rgba(220,214,208,0.25)" : "rgba(220,214,208,0.78)",
                           textDecoration: checked ? "line-through" : "none",
+                          textDecorationColor: checked ? "rgba(220, 214, 208, 0.32)" : undefined,
+                          opacity: checked ? 0.7 : 1,
                         }}
                       >
                         {item.text}

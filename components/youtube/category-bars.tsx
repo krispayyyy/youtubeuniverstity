@@ -35,7 +35,7 @@ function playTick() {
   if (now - _lastTickTime < TICK_COOLDOWN_MS) return;
   _lastTickTime = now;
   if (!_tickAudio) {
-    _tickAudio = new Audio("./sounds/tick.mp3");
+    _tickAudio = new Audio("/sounds/tick.mp3");
     // matches the volume set on the bento grid's GridCard tick
     _tickAudio.volume = 0.35;
   }
@@ -107,10 +107,10 @@ export default function CategoryBars({
                 // Subtle selected outline — negative margin avoids layout shift
                 borderRadius: 6,
                 border: isSel
-                  ? "1px solid var(--overlay-medium)"
+                  ? isDark ? "1px solid var(--overlay-medium)" : "1px solid rgba(0,0,0,0.18)"
                   : "1px solid transparent",
                 background: isSel
-                  ? "var(--overlay-subtle)"
+                  ? isDark ? "var(--overlay-subtle)" : "rgba(0,0,0,0.06)"
                   : isHov
                   // hover bg: subtle lift — white tint on dark, dark tint on light
                   ? isDark ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.04)"

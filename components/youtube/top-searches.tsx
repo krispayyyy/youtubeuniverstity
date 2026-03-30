@@ -77,7 +77,16 @@ export default function TypewriterSearchBar({
   const [phase, setPhase] = React.useState<"typing" | "hold" | "erasing">("typing");
   const [expanded, setExpanded] = React.useState(defaultExpanded);
 
-  const target = terms[idx]?.term ?? "";
+  // Filter and sort: remove "webflow", then order by count descending (highest first)
+  const filtered = React.useMemo(
+    () =>
+      [...terms]
+        .filter((t) => t.term.toLowerCase() !== "webflow")
+        .sort((a, b) => b.count - a.count),
+    [terms]
+  );
+
+  const target = filtered[idx % filtered.length]?.term ?? "";
   const ghost = phase === "typing" ? target.slice(displayed.length) : "";
 
   React.useEffect(() => {
@@ -101,15 +110,15 @@ export default function TypewriterSearchBar({
           20 + Math.random() * 22
         );
       } else {
-        setIdx((p) => (p + 1) % terms.length);
+        setIdx((p) => (p + 1) % filtered.length);
         setPhase("typing");
       }
     }
 
     return () => clearTimeout(timer);
-  }, [displayed, phase, idx, target, terms.length]);
+  }, [displayed, phase, idx, target, filtered.length]);
 
-  const currentCount = terms[idx]?.count;
+  const currentCount = filtered[idx % filtered.length]?.count;
 
   return (
     <div style={{ display: "flex", flexDirection: "column" }}>
@@ -236,7 +245,7 @@ export default function TypewriterSearchBar({
                 marginTop: 16,
               }}
             >
-              {terms.map((item, i) => (
+              {filtered.map((item, i) => (
                 <motion.div
                   key={item.term}
                   initial={{ opacity: 0, x: -5 }}
@@ -262,7 +271,7 @@ export default function TypewriterSearchBar({
                     animate={{
                       color: defaultExpanded
                         ? "var(--text-primary)"
-                        : item.term === terms[idx]?.term
+                        : item.term === filtered[idx % filtered.length]?.term
                           ? "var(--text-primary)"
                           : "var(--text-muted)",
                     }}

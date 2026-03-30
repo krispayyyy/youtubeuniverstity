@@ -207,18 +207,21 @@ export default function ContributionHeatmap({
   // Measure the container and compute cell + gap so the grid fills the width,
   // matching GitHub's behaviour. Recalculates on every resize.
   const [cell, setCell] = React.useState(DEFAULT_CELL);
-  const gap = Math.max(1, Math.round(cell * GAP_RATIO));
+  const [gap, setGap] = React.useState(Math.max(1, Math.round(DEFAULT_CELL * GAP_RATIO)));
   const step = cell + gap;
 
-  React.useEffect(() => {
+  React.useLayoutEffect(() => {
     const el = containerRef.current;
     if (!el || weeks.length === 0) return;
     const compute = (w: number) => {
       const available = w - DAY_LABEL_W;
-      const rawStep = available / weeks.length;
-      const rawGap = Math.max(1, Math.round(rawStep * GAP_RATIO));
-      const rawCell = Math.max(4, rawStep - rawGap);
-      setCell(rawCell);
+      const n = weeks.length;
+      // Compute gap from rough step, then solve for exact cell so grid fills width
+      const roughStep = available / n;
+      const computedGap = Math.max(1, Math.round(roughStep * GAP_RATIO));
+      const computedCell = Math.max(4, (available - (n - 1) * computedGap) / n);
+      setCell(computedCell);
+      setGap(computedGap);
     };
     compute(el.clientWidth);
     const ro = new ResizeObserver(([entry]) => compute(entry.contentRect.width));
@@ -271,7 +274,9 @@ export default function ContributionHeatmap({
           {/* Scrollable heatmap */}
           <div
             style={{
-              overflow: "auto",
+              flex: 1,
+              minWidth: 0,
+              overflow: "hidden",
               scrollbarWidth: "none",
               msOverflowStyle: "none",
             }}
@@ -296,7 +301,7 @@ export default function ContributionHeatmap({
                     <div
                       className="font-mono text-[9px] text-gray8 select-none"
                       style={{
-                        width: step,
+                        width: wi < weeks.length - 1 ? step : cell,
                         flexShrink: 0,
                         paddingLeft: 1,
                         lineHeight: "18px",
@@ -360,7 +365,8 @@ export default function ContributionHeatmap({
                         style={{
                           width: cell,
                           height: cell,
-                          marginRight: gap,
+                          // No trailing margin on the last column so grid reaches the right edge
+                          marginRight: wi < weeks.length - 1 ? gap : 0,
                           marginBottom: gap,
                           backgroundColor: color,
                           borderRadius: Math.max(2, Math.round(cell * 0.25)),

@@ -5,7 +5,7 @@ import { useMediaQuery } from "@/components/use-media-query";
 import { MOCK_STATS } from "./mock-data";
 import ContributionHeatmap from "@/components/youtube/contribution-heatmap";
 import Odometer from "@/components/youtube/odometer";
-import YouTubeLineGraph from "@/components/youtube/youtube-line-graph";
+import YouTubeLineGraph, { ProgressRing } from "@/components/youtube/youtube-line-graph";
 import CategoryBars from "@/components/youtube/category-bars";
 import { ParticleMorph } from "@/components/particles/particle-morph";
 import { ATOM_SHAPE_INDEX, ROCKET_SHAPE_INDEX, PLAY_SHAPE_INDEX, SHAPE_NAMES, ALL_SHAPES_X, ALL_SHAPES_Y } from "@/components/particles/shapes";
@@ -1387,12 +1387,21 @@ type Story = StoryObj<typeof meta>;
 
 type TimelineView = "heatmap" | "linegraph";
 
-function ViewToggle({ active, onChange }: { active: TimelineView; onChange: (v: TimelineView) => void }) {
+function ViewToggle({ active, onChange, containerHovered = false }: { active: TimelineView; onChange: (v: TimelineView) => void; containerHovered?: boolean }) {
   const [nudgeDone, setNudgeDone] = React.useState(false);
+  const [nudgeKey, setNudgeKey] = React.useState(0);
+  const [hoveredBtn, setHoveredBtn] = React.useState<TimelineView | null>(null);
+
   React.useEffect(() => {
     const t = setTimeout(() => setNudgeDone(true), 1400);
     return () => clearTimeout(t);
   }, []);
+
+  React.useEffect(() => {
+    if (containerHovered && nudgeDone) {
+      setNudgeKey((k) => k + 1);
+    }
+  }, [containerHovered]);
 
   return (
     <div
@@ -1407,10 +1416,17 @@ function ViewToggle({ active, onChange }: { active: TimelineView; onChange: (v: 
       {(["heatmap", "linegraph"] as TimelineView[]).map((v) => {
         const isActive = active === v;
         const label = v === "heatmap" ? "Heatmap" : "Line graph";
+        const shouldNudge = !nudgeDone || containerHovered;
+        // Inactive button brightens on hover (gray8 → gray11)
+        const textColor = isActive
+          ? "var(--color-gray12)"
+          : hoveredBtn === v ? "var(--color-gray11)" : "var(--color-gray8)";
         return (
           <motion.button
             key={v}
             onClick={() => { setNudgeDone(true); onChange(v); }}
+            onMouseEnter={() => setHoveredBtn(v)}
+            onMouseLeave={() => setHoveredBtn(null)}
             layout
             style={{
               position: "relative",
@@ -1419,7 +1435,7 @@ function ViewToggle({ active, onChange }: { active: TimelineView; onChange: (v: 
               border: "none",
               cursor: "pointer",
               background: "none",
-              color: isActive ? "var(--color-gray12)" : "var(--color-gray8)",
+              color: textColor,
               fontSize: 10,
               letterSpacing: "0.06em",
               textTransform: "uppercase",
@@ -1430,8 +1446,9 @@ function ViewToggle({ active, onChange }: { active: TimelineView; onChange: (v: 
           >
             {isActive && (
               <motion.div
+                key={nudgeKey}
                 layoutId="toggle-bg"
-                animate={!nudgeDone ? { x: [0, 7, 0] } : {}}
+                animate={shouldNudge ? { x: [0, 7, 0] } : {}}
                 style={{
                   position: "absolute",
                   inset: 0,
@@ -1441,7 +1458,7 @@ function ViewToggle({ active, onChange }: { active: TimelineView; onChange: (v: 
                 }}
                 transition={{
                   layout: { type: "spring", stiffness: 400, damping: 35 },
-                  x: { delay: 0.7, duration: 0.38, ease: ["easeOut", "easeIn"], times: [0, 0.42, 1] },
+                  x: { delay: containerHovered ? 0 : 0.7, duration: 0.38, ease: ["easeOut", "easeIn"], times: [0, 0.42, 1] },
                 }}
               />
             )}
@@ -1641,6 +1658,78 @@ function BigStat({
   );
 }
 
+// ─── EnjStatsPill — progress pill for Design Engineer card ───────────────────
+// Matches the line graph pill: starts at full value, live-updates with cursor
+// position on the ruler, and morphs colors when actively interacting.
+function EnjStatsPill({ score, total, cursorFraction, morph }: {
+  score: number;       // 0–100 (full journey %)
+  total: number;       // total checklist items (22)
+  cursorFraction: number | null;  // 0–1 cursor position on ruler, null = idle
+  morph: boolean;      // true when actively interacting (hover/drag)
+}) {
+  const done = Math.round(score / 100 * total);
+  // When cursor is on the ruler, map linearly from 0 → score like the line graph
+  const livePct = cursorFraction != null
+    ? cursorFraction * score
+    : score;
+  const liveCount = cursorFraction != null
+    ? Math.round(cursorFraction * done)
+    : done;
+
+  const ringStroke = morph ? "var(--accent)" : "var(--text-primary)";
+  const pctColor = morph ? "var(--accent)" : "var(--text-primary)";
+
+  return (
+    <motion.div
+      initial={false}
+      animate={{
+        background: morph ? "var(--pill-bg-active)" : "var(--pill-bg)",
+        borderColor: morph ? "var(--overlay-strong)" : "var(--overlay-medium)",
+      }}
+      transition={{
+        background: { duration: 0.25, ease: "easeInOut" },
+        borderColor: { duration: 0.25, ease: "easeInOut" },
+      }}
+      style={{
+        display: "inline-flex",
+        alignItems: "center",
+        gap: 6,
+        padding: "5px 6px 5px 12px",
+        borderRadius: 100,
+        border: "1px solid",
+        minWidth: 148,
+      }}
+    >
+      <span className="font-mono text-[11px] select-none whitespace-nowrap tabular-nums" style={{ color: "var(--color-gray9)", minWidth: 28 }}>
+        {String(liveCount).padStart(2, "0")}/{total}
+      </span>
+      <div style={{ width: 1, height: 9, background: "var(--overlay-strong)", flexShrink: 0 }} />
+      <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+        <ProgressRing
+          current={livePct}
+          endpoint={score}
+          size={13}
+          strokeWidth={1.5}
+          activeStroke={ringStroke}
+        />
+        <span
+          className="font-mono text-[11px] select-none whitespace-nowrap tabular-nums"
+          style={{ color: pctColor, transition: "color 0.2s ease", minWidth: 38 }}
+        >
+          {livePct.toFixed(1)}%
+        </span>
+      </div>
+      {/* 2×2 grid icon — matches line graph pill */}
+      <svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden style={{ color: "var(--color-gray9)", flexShrink: 0, marginLeft: 2 }}>
+        <rect x="0.25" y="0.25" width="3.75" height="3.75" rx="0.6" fill="currentColor" />
+        <rect x="6"    y="0.25" width="3.75" height="3.75" rx="0.6" fill="currentColor" />
+        <rect x="0.25" y="6"    width="3.75" height="3.75" rx="0.6" fill="currentColor" />
+        <rect x="6"    y="6"    width="3.75" height="3.75" rx="0.6" fill="currentColor" />
+      </svg>
+    </motion.div>
+  );
+}
+
 function RhythmCard({ stats = MOCK_STATS, accentColor = "#E95F38" }: { stats?: YouTubeStats; accentColor?: string }) {
   const [view, setView] = React.useState<TimelineView>("heatmap");
   // hovered: drives the header label color transition (same pattern as other grid cards)
@@ -1665,7 +1754,7 @@ function RhythmCard({ stats = MOCK_STATS, accentColor = "#E95F38" }: { stats?: Y
         <span className="font-mono text-[13px] text-gray11 select-none">
           Daily learning activity
         </span>
-        <ViewToggle active={view} onChange={setView} />
+        <ViewToggle active={view} onChange={setView} containerHovered={hovered && view === "heatmap"} />
       </div>
 
       {/*
@@ -1684,6 +1773,8 @@ function RhythmCard({ stats = MOCK_STATS, accentColor = "#E95F38" }: { stats?: Y
         animate={{ height: containerHeight }}
         transition={{ type: "spring", stiffness: 300, damping: 30 }}
         className="rhythm-heatmap-wrap"
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
         style={{
           position: "relative",
           borderRadius: "12px 12px 0 0",
@@ -1702,7 +1793,7 @@ function RhythmCard({ stats = MOCK_STATS, accentColor = "#E95F38" }: { stats?: Y
               exit={{ opacity: 0, filter: "blur(7px)" }}
               transition={{ duration: 0.22, ease: "easeInOut" }}
               className="rhythm-heatmap-inner"
-              style={{ padding: 24 }}
+              style={{ padding: "24px 48px 24px 20px" }}
             >
               <ContributionHeatmap data={stats.dailyBuckets} title="" highlightDates={activeHighlight} accentColor={accentColor} />
             </motion.div>
@@ -1725,6 +1816,21 @@ function RhythmCard({ stats = MOCK_STATS, accentColor = "#E95F38" }: { stats?: Y
             data={stats.dailyBuckets}
             journeyPercent={computeDesignEngineerScore(stats)}
             minutesPerVideo={stats.avgVideosPerDay > 0 ? (stats.avgHoursPerDay / stats.avgVideosPerDay) * 60 : 13}
+          />
+          {/* Right-edge fade — scroll affordance */}
+          <div
+            style={{
+              position: "absolute",
+              top: 0,
+              right: 0,
+              bottom: 0,
+              width: 80,
+              right: -28,
+              background: "linear-gradient(to right, transparent, var(--bg-primary) 60%)",
+              pointerEvents: "none",
+              opacity: 0.4,
+              filter: "blur(8px)",
+            }}
           />
         </motion.div>
       </motion.div>
@@ -1969,7 +2075,7 @@ function GridCard({
   return (
     <div
       className={`mg-card${isElevated ? " mg-card--active" : ""}${className ? ` ${className}` : ''}`}
-      onMouseEnter={() => { playTick(); setHovered(true); onMouseEnter?.(); }}
+      onMouseEnter={() => { if (!disableSound) playTick(); setHovered(true); onMouseEnter?.(); }}
       onMouseLeave={() => { setHovered(false); onMouseLeave?.(); }}
       onClick={onClick}
       style={{
@@ -2946,8 +3052,8 @@ function GridView() {
               Daily habit
             </span>
             {/* Time display: number large, unit letter small + faint — makes the unit feel like a label, not data */}
-            <div style={{ flex: 1, display: "flex", alignItems: "center", gap: 10 }}>
-              <span className="font-mono select-none" style={{ fontSize: 18, color: "var(--text-faint)", letterSpacing: "-0.02em", lineHeight: 1, alignSelf: "center" }}>~</span>
+            <div style={{ flex: 1, display: "flex", alignItems: "center", gap: 8 }}>
+              <span className="font-mono select-none" style={{ fontSize: 28, color: "var(--color-gray12)", lineHeight: 1, opacity: 0.6 }}>~</span>
               <div style={{ display: "flex", alignItems: "baseline", gap: 2 }}>
                 <span className="font-mono select-none" style={{ fontSize: 44, color: "var(--color-gray12)", letterSpacing: "-0.04em", lineHeight: 1, fontVariantNumeric: "tabular-nums" }}>
                   {splitHoursMinutes(stats.avgHoursPerDay).h}
@@ -3897,6 +4003,7 @@ function MainGridView({ ginnMode = false, accentColor = "#E95F38" }: { ginnMode?
   const [lateNightPersona, setLateNightPersona]       = React.useState(0);
   const isTouchDevice = useMediaQuery("(hover: none)");
   const [enjHovered, setEnjHovered]                   = React.useState(false);
+  const [enjCursorFraction, setEnjCursorFraction]     = React.useState<number | null>(null);
   const [enjModalOpen, setEnjModalOpen]               = React.useState(false);
   // default to top category by watch percentage, not hardcoded "ai"
   const [selectedCategoryId, setSelected] = React.useState<string>(
@@ -4267,7 +4374,7 @@ function MainGridView({ ginnMode = false, accentColor = "#E95F38" }: { ginnMode?
                       style={{
                         display: "flex", alignItems: "center", gap: 6,
                         background: isDark ? "rgba(255,255,255,0.15)" : "rgba(0,0,0,0.08)",
-                        color: isDark ? "rgba(255,255,255,0.95)" : "rgba(0,0,0,0.70)",
+                        color: isDark ? "rgba(255,255,255,0.95)" : "rgba(0,0,0,0.92)",
                         border: isDark ? "1px solid rgba(255,255,255,0.25)" : "1px solid rgba(0,0,0,0.18)",
                         borderRadius: 20,
                         padding: "5px 12px 5px 14px",
@@ -4328,8 +4435,8 @@ function MainGridView({ ginnMode = false, accentColor = "#E95F38" }: { ginnMode?
                 <GridCard delay={0.07} category="personal" disabled={isCategoryDisabled("personal")} style={{ height: colAH[0], flexShrink: 0 }}>
                   <div style={{ height: "100%", padding: "20px 22px", display: "flex", flexDirection: "column" }}>
                     <span className="select-none" style={{ fontSize: 9, color: "var(--text-faint)", letterSpacing: "0.1em", textTransform: "uppercase", fontFamily: "'Geist Mono', ui-monospace, monospace" }}>Daily habit</span>
-                    <div style={{ flex: 1, display: "flex", alignItems: "center", gap: 10 }}>
-                      <span className="font-mono select-none" style={{ fontSize: 18, color: "var(--text-faint)", letterSpacing: "-0.02em", lineHeight: 1, alignSelf: "center" }}>~</span>
+                    <div style={{ flex: 1, display: "flex", alignItems: "center", gap: 8 }}>
+                      <span className="font-mono select-none" style={{ fontSize: 28, color: "var(--color-gray12)", lineHeight: 1, opacity: 0.6 }}>~</span>
                       <div style={{ display: "flex", alignItems: "baseline", gap: 2 }}>
                         <span className="font-mono select-none" style={{ fontSize: 44, color: "var(--color-gray12)", letterSpacing: "-0.04em", lineHeight: 1, fontVariantNumeric: "tabular-nums" }}>
                           {splitHoursMinutes(stats.avgHoursPerDay).h}
@@ -4477,6 +4584,7 @@ function MainGridView({ ginnMode = false, accentColor = "#E95F38" }: { ginnMode?
               category="ai"
               className="mg-enj-card"
               disabled={isCategoryDisabled("ai")}
+              disableSound
               style={{ gridColumn: "1 / 5", gridRow: "2" }}
             >
               <div
@@ -4498,11 +4606,18 @@ function MainGridView({ ginnMode = false, accentColor = "#E95F38" }: { ginnMode?
                       fontFamily: "'Geist Mono', ui-monospace, monospace",
                     }}
                   >
-                    {`Design Engineer Progress (${Math.round(computeDesignEngineerScore(stats) / 100 * 22)}/22)`}
+                    Design Engineer Progress
                   </span>
-                  <ProgressPill progress={computeDesignEngineerScore(stats) / 100} />
+                  {/* Stats pill — mirrors the line graph pill style */}
+                  <EnjStatsPill
+                    score={computeDesignEngineerScore(stats)}
+                    total={22}
+                    cursorFraction={enjCursorFraction}
+                    morph={isTouchDevice || enjCursorFraction != null}
+                  />
                 </div>
 
+                <div style={{ height: 8 }} />
                 {/* Ruler — flex:1 fills remaining height, vertically centered */}
                 <div style={{ flex: 1, display: "flex", alignItems: "center" }}>
                   <EnjProgress
@@ -4511,6 +4626,7 @@ function MainGridView({ ginnMode = false, accentColor = "#E95F38" }: { ginnMode?
                     hideLabel
                     showFooter
                     glass={DEFAULT_GLASS}
+                    onCursorFraction={setEnjCursorFraction}
                   />
                 </div>
               </div>
@@ -4965,8 +5081,8 @@ export function MainGridGinnView({ orangeColor = "#E14920" }: { orangeColor?: st
           --pill-orange-tint: 0.78;
 
           /* Ruler tick colors — dark on light surface, orange accent for active majors */
-          --tick-major-rest:     ${orangeColor}BB;
-          --tick-major-hover:    ${orangeColor}EE;
+          --tick-major-rest:     rgba(29, 27, 26, 0.70);
+          --tick-major-hover:    rgba(29, 27, 26, 0.90);
           --tick-major-disabled: rgba(0, 0, 0, 0.12);
           --tick-minor-rest:     rgba(0, 0, 0, 0.30);
           --tick-minor-hover:    rgba(0, 0, 0, 0.50);
@@ -5100,7 +5216,7 @@ export function MainGridGinnView({ orangeColor = "#E14920" }: { orangeColor?: st
 
           /* ── EnjProgress card: enough room for the ruler visualization */
           .mg-ginn-test .mg-enj-card .mg-card-inner {
-            height: 180px !important;
+            height: 200px !important;
           }
 
           /* ── Bottom section: stack left group above right group */
