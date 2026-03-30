@@ -2583,7 +2583,7 @@ export function SubscriptionsCardInner({ onOpen, stats: statsArg }: { onOpen: ()
           <span className="font-mono select-none" style={{ fontSize: 44, color: "var(--color-gray12)", letterSpacing: "-0.04em", lineHeight: 1, fontVariantNumeric: "tabular-nums" }}>
             {statsArg.totalSubscriptions}
           </span>
-          <span className="font-mono select-none" style={{ fontSize: 11, color: "var(--text-faint)", letterSpacing: "0.02em" }}>
+          <span className="font-mono select-none" style={{ fontSize: 13, color: "var(--color-gray9)", letterSpacing: "-0.02em" }}>
             channels
           </span>
         </div>

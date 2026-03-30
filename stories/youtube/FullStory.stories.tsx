@@ -1391,6 +1391,7 @@ function ViewToggle({ active, onChange, containerHovered = false }: { active: Ti
   const [nudgeDone, setNudgeDone] = React.useState(false);
   const [nudgeKey, setNudgeKey] = React.useState(0);
   const [hoveredBtn, setHoveredBtn] = React.useState<TimelineView | null>(null);
+  const [hasToggled, setHasToggled] = React.useState(false);
 
   React.useEffect(() => {
     const t = setTimeout(() => setNudgeDone(true), 1400);
@@ -1398,7 +1399,7 @@ function ViewToggle({ active, onChange, containerHovered = false }: { active: Ti
   }, []);
 
   React.useEffect(() => {
-    if (containerHovered && nudgeDone) {
+    if (containerHovered && nudgeDone && !hasToggled) {
       setNudgeKey((k) => k + 1);
     }
   }, [containerHovered]);
@@ -1416,7 +1417,7 @@ function ViewToggle({ active, onChange, containerHovered = false }: { active: Ti
       {(["heatmap", "linegraph"] as TimelineView[]).map((v) => {
         const isActive = active === v;
         const label = v === "heatmap" ? "Heatmap" : "Line graph";
-        const shouldNudge = !nudgeDone || containerHovered;
+        const shouldNudge = (!nudgeDone || containerHovered) && !hasToggled;
         // Inactive button brightens on hover (gray8 → gray11)
         const textColor = isActive
           ? "var(--color-gray12)"
@@ -1424,7 +1425,7 @@ function ViewToggle({ active, onChange, containerHovered = false }: { active: Ti
         return (
           <motion.button
             key={v}
-            onClick={() => { setNudgeDone(true); onChange(v); }}
+            onClick={() => { setNudgeDone(true); setHasToggled(true); onChange(v); }}
             onMouseEnter={() => setHoveredBtn(v)}
             onMouseLeave={() => setHoveredBtn(null)}
             layout
@@ -1668,13 +1669,19 @@ function EnjStatsPill({ score, total, cursorFraction, morph }: {
   morph: boolean;      // true when actively interacting (hover/drag)
 }) {
   const done = Math.round(score / 100 * total);
-  // When cursor is on the ruler, map linearly from 0 → score like the line graph
-  const livePct = cursorFraction != null
-    ? cursorFraction * score
+  // Map cursor position to the nearest major tick (notch).
+  // Each notch = one checklist item. Capped at `done` — can't go past completed items.
+  // 85 ticks, major every 4 = 22 major ticks (indices 0, 4, 8, ..., 84)
+  const TICKS = 85;
+  const MAJOR = 4;
+  const cursorNotch = cursorFraction != null
+    ? Math.min(done, Math.round(cursorFraction * (TICKS - 1) / MAJOR) + 1)
+    : null;
+  const liveCount = cursorNotch ?? done;
+  // Percentage scales proportionally: each completed item = score/done % points
+  const livePct = cursorNotch != null
+    ? done > 0 ? (cursorNotch / done) * score : 0
     : score;
-  const liveCount = cursorFraction != null
-    ? Math.round(cursorFraction * done)
-    : done;
 
   const ringStroke = morph ? "var(--accent)" : "var(--text-primary)";
   const pctColor = morph ? "var(--accent)" : "var(--text-primary)";
