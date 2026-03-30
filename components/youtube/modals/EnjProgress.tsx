@@ -447,7 +447,7 @@ export function EnjProgress({
   const rulerRef = React.useRef<HTMLDivElement>(null);
 
   // Sound — tick on major tick boundary crossings, same volume as line graph scrub
-  const tick = useSound("/sounds/tick.mp3", SOUND_OPTIONS);
+  const tick = useSound("./sounds/tick.mp3", SOUND_OPTIONS);
 
   // Fire at every half-tick distance for rapid-fire sound matching the line graph density
   const lastHalfTickIdx = React.useRef<number | null>(null);
