@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- Hard-fill favicon. Solid #F8F8F8 square — Next.js auto-serves this from
+       app/icon.svg at /icon, no <link> tag needed. Browsers render it in the
+       tab strip at ~16×16 so the shape detail doesn't matter, only the color. -->
+  <rect width="64" height="64" fill="#F8F8F8" />
+</svg>
