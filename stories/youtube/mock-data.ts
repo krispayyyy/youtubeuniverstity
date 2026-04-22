@@ -244,4 +244,5 @@ export const MOCK_STATS: YouTubeStats = {
     { tool: 'ChatGPT',       earlyN: 10,  recentN: 5  },
     { tool: 'Webflow',       earlyN: 10,  recentN: 4  },
   ] as ToolLoyaltyRow[],
+  longestStreakPerCategory: {},
 };
