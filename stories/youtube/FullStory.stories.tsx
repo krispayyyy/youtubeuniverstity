@@ -65,133 +65,21 @@ import {
 } from "../../components/youtube/modals/DataStories";
 import { EnjProgress, ProgressPill, DEFAULT_GLASS, ChecklistModal1 } from "../../components/youtube/modals/EnjProgress";
 
-/** Re-hydrate Date fields that JSON.stringify serialized to ISO strings */
-function hydrateStats(raw: typeof rawDefaultStats): YouTubeStats {
-  const base = {
-    ...(raw as unknown as YouTubeStats),
-    dateRange: {
-      earliest: new Date(raw.dateRange.earliest as unknown as string),
-      latest:   new Date(raw.dateRange.latest   as unknown as string),
-    },
-    weeklyBuckets: raw.weeklyBuckets.map((b) => ({
-      ...b,
-      weekStart: new Date(b.weekStart as unknown as string),
-    })),
-  };
-  // Derive avgHoursPerDay if missing (e.g. stats.json built before this field was added)
-  return {
-    ...base,
-    avgHoursPerDay: base.avgHoursPerDay ?? (base.avgVideosPerDay * AVG_VIDEO_MINUTES / 60),
-    rabbitHoleCount: base.rabbitHoleCount ?? 0,
-    rabbitHoleDates: base.rabbitHoleDates ?? [],
-    topRabbitHoleCategory: base.topRabbitHoleCategory ?? "AI & Machine Learning",
-    rabbitHoleCategoryCounts: base.rabbitHoleCategoryCounts ?? {},
-    longestStreakPerCategory: base.longestStreakPerCategory ?? {},
-    toolJourney: base.toolJourney ?? [],
-  };
-}
+// ─── Phase 1 migration extractions ───────────────────────────────────────────
+import { DEFAULT_STATS } from "@/lib/hydrate-stats";
+import { splitHoursMinutes } from "@/lib/format-helpers";
+import { PAGE_MAX_W, PAGE_PAD } from "@/lib/page-constants";
+import { BUILDER_PROFILES, calcBuilderProfile, type BuilderProfileId } from "@/lib/calc-builder-profile";
+import { FOCUS_SORTED_ORGANIC, FOCUS_SORTED_YOUTUBE, FOCUS_DIM, buildFocusColorMap, useIsDark } from "@/components/youtube/focus-color-map";
 
-const DEFAULT_STATS: YouTubeStats = hydrateStats(rawDefaultStats);
+// hydrateStats + DEFAULT_STATS now live in @/lib/hydrate-stats.
+// splitHoursMinutes now lives in @/lib/format-helpers.
+// (moved 2026-04-21 for Vercel migration)
 
-/** Splits decimal hours into { h, m } for "2H 36M" display */
-/**
- * Shared journey percent calculation used by both the line graph marker and the EnjProgress bar.
- * Returns 0–100. Journey runs from the user's earliest data date to Dec 31 2026 (the "design engineer" target).
- * Both components must call this so the two values stay in sync.
- */
-
-function splitHoursMinutes(hours: number): { h: number; m: number } {
-  const h = Math.floor(hours);
-  const m = Math.round((hours - h) * 60);
-  return { h, m };
-}
-
-// ─── Focus color map helpers ───────────────────────────────────────────────
-// Organic blob sort — same algorithm as ParticleSphere stories.
-// Pre-computed once at module load; shared across all MainGridView instances.
-
-const _FOCUS_N      = 1500;
-const _FOCUS_GOLDEN = (1 + Math.sqrt(5)) / 2;
-
-function _focusLcgNoise(i: number): number {
-  let s = (i * 1664525 + 1013904223) & 0x7fffffff;
-  s = (s * 22695477 + 1) & 0x7fffffff;
-  return s / 0x7fffffff;
-}
-
-const _focusScores = Array.from({ length: _FOCUS_N }, (_, i) => {
-  const theta = (2 * Math.PI * i) / _FOCUS_GOLDEN;
-  const phi   = Math.acos(1 - (2 * i) / (_FOCUS_N - 1));
-  return (
-    theta
-    + 0.6 * Math.sin(4  * phi  + 0.7)
-    + 0.4 * Math.sin(7  * theta + phi  * 2)
-    + 0.3 * Math.sin(13 * phi  - theta * 1.5)
-    + 0.2 * (2 * _focusLcgNoise(i) - 1)
-  );
-});
-
-const FOCUS_SORTED_ORGANIC: number[] = Array.from({ length: _FOCUS_N }, (_, i) => i)
-  .sort((a, b) => _focusScores[a] - _focusScores[b]);
-
-// YouTube play-button sort — spatial x-position split so 72% AI sits on the left face.
-// Same algorithm as ParticleSphere.stories.tsx SORTED_YOUTUBE.
-const _playX    = Array.from({ length: _FOCUS_N }, (_, i) => ALL_SHAPES_X[i][PLAY_SHAPE_INDEX]);
-const _playY    = Array.from({ length: _FOCUS_N }, (_, i) => ALL_SHAPES_Y[i][PLAY_SHAPE_INDEX]);
-const _playXMax = Math.max(..._playX.map(Math.abs)) || 1;
-const _playYMax = Math.max(..._playY.map(Math.abs)) || 1;
-
-const FOCUS_SORTED_YOUTUBE: number[] = Array.from({ length: _FOCUS_N }, (_, i) => i)
-  .sort((a, b) => {
-    const score = (x: number, y: number, i: number) =>
-      x / _playXMax + 0.25 * (y / _playYMax) + 0.12 * (2 * _focusLcgNoise(i) - 1);
-    return score(_playX[a], _playY[a], a) - score(_playX[b], _playY[b], b);
-  });
-
-const FOCUS_DIM = "#333333";
-
-// FOCUS_ALLOWED_SHAPES virtual index → actual shape index (defined later, forward-declared here)
-// 0=sphere, 1=cube, 2=torus, 3=PLAY_SHAPE_INDEX
-function buildFocusColorMap(
-  areas: Array<{ id: string; pct: number }>,
-  selectedId: string,
-  activeColor: string,
-  dimColor = FOCUS_DIM,
-  actualShapeIndex = 0,
-): string[] {
-  const sorted = actualShapeIndex === PLAY_SHAPE_INDEX ? FOCUS_SORTED_YOUTUBE : FOCUS_SORTED_ORGANIC;
-  const map = new Array<string>(_FOCUS_N);
-  let offset = 0;
-  for (const f of areas) {
-    const count = Math.round((f.pct / 100) * _FOCUS_N);
-    const end   = Math.min(offset + count, _FOCUS_N);
-    const color = f.id === selectedId ? activeColor : dimColor;
-    for (let k = offset; k < end; k++) map[sorted[k]] = color;
-    offset = end;
-  }
-  for (let k = offset; k < _FOCUS_N; k++) map[sorted[k]] = dimColor;
-  return map;
-}
-
-// ─── Theme hook ───────────────────────────────────────────────────────────────
-// Subscribes to data-theme attribute changes on <html> — same source as PageThemeToggle.
-function useIsDark(): boolean {
-  const [isDark, setIsDark] = React.useState(
-    () => document.documentElement.getAttribute("data-theme") !== "light",
-  );
-  React.useEffect(() => {
-    const obs = new MutationObserver(() => {
-      setIsDark(document.documentElement.getAttribute("data-theme") !== "light");
-    });
-    obs.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
-    return () => obs.disconnect();
-  }, []);
-  return isDark;
-}
-
-// ─── Layout constants ─────────────────────────────────────────────────────────
-const PAGE_MAX_W = 1100;
-const PAGE_PAD   = "0 40px";
+// Focus color map, useIsDark, PAGE_MAX_W, PAGE_PAD — extracted to:
+//   @/components/youtube/focus-color-map  (FOCUS_SORTED_*, buildFocusColorMap, useIsDark, FOCUS_DIM)
+//   @/lib/page-constants                  (PAGE_MAX_W, PAGE_PAD)
+// (moved 2026-04-21 for Vercel migration)
 
 // ─── Divider ──────────────────────────────────────────────────────────────────
 function Divider() {
@@ -2634,38 +2522,8 @@ function TopSearchesExplorer({ onClose, terms }: { onClose: () => void; terms: {
 const BE_TICK_COUNT = 40;
 const BE_TICK_H     = 20;
 
-// display = the bar fill target for that tier (used when the user explores)
-const BUILDER_PROFILES = [
-  {
-    id:      "intern"  as const,
-    label:   "Eng Intern",
-    range:   [0, 59]   as [number, number],
-    display: 30,
-    desc:    "Taking everything in, committing to nothing. Exploring the surface — still finding your stack.",
-  },
-  {
-    id:      "pr"      as const,
-    label:   "PR Pusher",
-    range:   [60, 79]  as [number, number],
-    display: 70,
-    desc:    "Shipping consistently across the stack. Solid breadth, starting to build depth in one place.",
-  },
-  {
-    id:      "builder" as const,
-    label:   "Full-Stack Builder",
-    range:   [80, 100] as [number, number],
-    display: 100,
-    desc:    "Deep in the stack, no half measures. High focus, strong output — fully committed.",
-  },
-] as const;
-
-type BuilderProfileId = (typeof BUILDER_PROFILES)[number]["id"];
-
-function calcBuilderProfile(score: number): BuilderProfileId {
-  if (score <= 59) return "intern";
-  if (score <= 79) return "pr";
-  return "builder";
-}
+// BUILDER_PROFILES, BuilderProfileId, calcBuilderProfile now live in @/lib/calc-builder-profile.
+// (moved 2026-04-21 for Vercel migration)
 
 function BuilderEnergyExplorer({ onClose, stats }: { onClose: () => void; stats: typeof MOCK_STATS }) {
   const closeRef    = React.useRef<HTMLButtonElement>(null);
