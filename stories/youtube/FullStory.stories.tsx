@@ -72,6 +72,30 @@ import { PAGE_MAX_W, PAGE_PAD } from "@/lib/page-constants";
 import { BUILDER_PROFILES, calcBuilderProfile, type BuilderProfileId } from "@/lib/calc-builder-profile";
 import { FOCUS_SORTED_ORGANIC, FOCUS_SORTED_YOUTUBE, FOCUS_DIM, buildFocusColorMap, useIsDark } from "@/components/youtube/focus-color-map";
 
+// ─── Phase 2 migration extractions — info pages + shared primitives ──────────
+import { playTick, playMainGridPop, TICK_COOLDOWN_MS } from "@/components/youtube/main-grid/sounds";
+import type { PageTarget } from "@/components/youtube/pages/nav";
+import { InfoPage } from "@/components/youtube/pages/InfoPage";
+import { FaqPage } from "@/components/youtube/pages/FaqPage";
+import { MethodologyPage } from "@/components/youtube/pages/MethodologyPage";
+import { InterviewAgentsPage } from "@/components/youtube/pages/InterviewAgentsPage";
+
+// Storybook-only adapter: maps PageTarget onto Storybook's linkTo so cross-page
+// navigation keeps working inside the Storybook iframe. Production (app/*/page.tsx)
+// uses Next.js router.push instead — neither path shares code with the other.
+const STORY_TARGETS: Record<PageTarget, [string, string]> = {
+  visualization: ["YouTube University", "Visualization"],
+  info:          ["YouTube University", "Info"],
+  faq:           ["YouTube University", "FAQ"],
+  methodology:   ["YouTube University", "How We Calculate"],
+  agents:        ["YouTube University", "Interview Agents"],
+};
+
+function navigateInStorybook(target: PageTarget) {
+  const [title, name] = STORY_TARGETS[target];
+  linkTo(title, name)();
+}
+
 // hydrateStats + DEFAULT_STATS now live in @/lib/hydrate-stats.
 // splitHoursMinutes now lives in @/lib/format-helpers.
 // (moved 2026-04-21 for Vercel migration)
@@ -5189,25 +5213,28 @@ function MainGridGinnMonoView({ orangeColor = "#E14920" }: { orangeColor?: strin
   );
 }
 
-// ─── Info pages — each is its own story, navigated via linkTo ─────────────────
+// ─── Info pages — extracted to components/youtube/pages; render via Next.js-parity wrapper ───
+// The inline InfoPageView/FAQPageView/MethodologyPageView/InterviewAgentsView definitions
+// above are now orphans — they still type-check but are no longer rendered by any story.
+// Scheduled for deletion in Phase 8 cleanup.
 export const InfoStory: Story = {
   name: "Info",
-  render: () => <InfoPageView />,
+  render: () => <InfoPage onNavigate={navigateInStorybook} />,
 };
 
 export const FAQStory: Story = {
   name: "FAQ",
-  render: () => <FAQPageView />,
+  render: () => <FaqPage onNavigate={navigateInStorybook} />,
 };
 
 export const HowWeCalculateStory: Story = {
   name: "How We Calculate",
-  render: () => <MethodologyPageView />,
+  render: () => <MethodologyPage onNavigate={navigateInStorybook} />,
 };
 
 export const InterviewAgentsStory: Story = {
   name: "Interview Agents",
-  render: () => <InterviewAgentsView />,
+  render: () => <InterviewAgentsPage onNavigate={navigateInStorybook} />,
 };
 
 // ─── Hover test: inner-shadow / outline variant ──────────────────────────────
