@@ -1085,7 +1085,8 @@ function PageCTABar({ onShare, onUpload = () => {} }: { onShare: () => void; onU
   return (
     // fixed: pins the bar to the viewport regardless of scroll
     <div style={{ position: "fixed", top: 20, right: 20, zIndex: 50, display: "flex", alignItems: "flex-start", gap: 6 }}>
-      <DotMatrixCTA label="Share" size="sm" onClick={onShare} />
+      {/* Share button hidden pending a share-card pass; kept in code so behavior is one flip away. */}
+      {/* <DotMatrixCTA label="Share" size="sm" onClick={onShare} /> */}
       {/* row: theme toggle left of upload button */}
       <div style={{ display: "flex", flexDirection: "row", gap: 6 }}>
         <PageThemeToggle />
