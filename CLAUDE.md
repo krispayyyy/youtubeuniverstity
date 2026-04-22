@@ -9,7 +9,7 @@ This is the **public-facing** version of a private development repo. It contains
 
 ## Source repo
 
-The private source repo is at `~/Desktop/Code/Youtube Extract` (GitHub: `krispayyyy/youtube-extractor`, private). That repo contains drafts, experiments, personal data, internal tooling, and course materials. This public repo is a curated subset.
+The private source repo is at `~/Desktop/Code/Projects/Youtube project/Youtube Uni (private)` (GitHub: `krispayyyy/youtube-extractor`, private). That repo contains drafts, experiments, personal data, internal tooling, and course materials. This public repo is a curated subset.
 
 ---
 
