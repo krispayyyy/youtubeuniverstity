@@ -310,7 +310,6 @@ export default function BuilderEnergy({
                   transition={{
                     duration: 0.35,
                     ease: [0.23, 0.88, 0.26, 0.92],
-                    exit: { duration: 0.18, ease: [0.23, 0.88, 0.26, 0.92] },
                   }}
                   className="font-mono select-none"
                   style={{

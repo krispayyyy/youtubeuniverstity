@@ -236,7 +236,7 @@ function ProgressIndicator({
 }: {
   progress: number;
   glass?: GlassConfig;
-  rulerRef: React.RefObject<HTMLDivElement>;
+  rulerRef: React.RefObject<HTMLDivElement | null>;
   /** Card-level hover — triggers the orange deepening affordance */
   cardHovered?: boolean;
 }) {
@@ -469,8 +469,8 @@ export function EnjProgress({
     }
   }, [onMouseMove, onCursorFraction, tick]);
 
-  const handlePointerLeave = React.useCallback((e: React.PointerEvent) => {
-    onMouseLeave(e);
+  const handlePointerLeave = React.useCallback(() => {
+    onMouseLeave();
     onCursorFraction?.(null);
     lastHalfTickIdx.current = null;
   }, [onMouseLeave, onCursorFraction]);
@@ -839,7 +839,7 @@ function MiniRuler({ progress }: { progress: number }) {
       ref={rulerRef}
       style={{ position: "relative", width: "100%" }}
       onPointerMove={(e) => { onMouseMove(e); setHovered(true); }}
-      onPointerLeave={(e) => { onMouseLeave(e); setHovered(false); }}
+      onPointerLeave={() => { onMouseLeave(); setHovered(false); }}
     >
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         {Array.from({ length: MINI_TICK_N }).map((_, i) => (

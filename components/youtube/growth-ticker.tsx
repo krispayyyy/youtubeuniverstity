@@ -247,7 +247,7 @@ function ToolDropdownMenu({
   selected: ToolLoyaltyTool;
   onSelect: (tool: ToolLoyaltyTool) => void;
   anchorRect: DOMRect | null;
-  timeline: ToolLoyaltyRow[];
+  timeline: readonly ToolLoyaltyRow[];
 }) {
   if (typeof document === "undefined" || !anchorRect) return null;
 
@@ -375,7 +375,7 @@ export function GrowthTickerModal({
   onClose: () => void;
   selectedTool: ToolLoyaltyTool;
   onSelectTool: (t: ToolLoyaltyTool) => void;
-  timeline?: ToolLoyaltyRow[];
+  timeline?: readonly ToolLoyaltyRow[];
 }) {
   const data = timeline ?? toolLoyaltyTimeline;
   const [trendFilter, setTrendFilter] = React.useState<ToolTrend>("growing");
@@ -764,7 +764,7 @@ export function GrowthTickerInteractive({
   timeline,
 }: {
   onModalOpenChange?: (open: boolean) => void;
-  timeline?: ToolLoyaltyRow[];
+  timeline?: readonly ToolLoyaltyRow[];
 }) {
   const data = timeline ?? toolLoyaltyTimeline;
   const [selectedTool, setSelectedTool] = React.useState<ToolLoyaltyTool>(

@@ -144,7 +144,7 @@ function DigitDrum({ digit, springConfig, delay = 0, noMask = false, theme }: Di
   // Re-run full animation from the top when theme toggles —
   // snap to start immediately, then spring to the target after the delay
   React.useEffect(() => {
-    spring.set(DIGIT_HEIGHT, { immediate: true });
+    spring.jump(DIGIT_HEIGHT);
     const timeout = setTimeout(() => {
       spring.set(-digit * DIGIT_HEIGHT);
     }, delay);

@@ -1969,8 +1969,7 @@ export function LateNightLearningModal({
                       <img src={p.avatarSrc} alt="Avatar" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
                     </div>
                     <span
-                      className="select-none"
-                      className="font-mono"
+                      className="select-none font-mono"
                       style={{ fontSize: 9, letterSpacing: "0.1em", textTransform: "uppercase", color: isActive ? "var(--text-secondary)" : "var(--text-faint)", transition: "color 0.18s ease" }}
                     >
                       Avatar
@@ -2537,10 +2536,7 @@ function FlaggedGridView() {
   );
 }
 
-/** Flagged data stories as interactive grid cards */
-export const FlaggedGrid: Story = {
-  render: () => <FlaggedGridView />,
-};
+/** Flagged data stories as interactive grid cards (Storybook export removed during Vercel migration) */
 
 // ─── Subscriptions card + modal ───────────────────────────────────────────────
 
