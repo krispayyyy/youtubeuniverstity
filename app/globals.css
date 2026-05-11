@@ -1,5 +1,5 @@
-@import url('https://fonts.googleapis.com/css2?family=Geist+Mono:wght@100..900&display=swap');
 @import 'tailwindcss';
+@import url('https://fonts.googleapis.com/css2?family=Geist+Mono:wght@100..900&display=swap');
 
 @font-face {
   font-family: 'PP Neue Montreal';
@@ -30,7 +30,7 @@
 }
 
 @theme {
-  /* Dark mode color system */
+  /* Dark mode colors from original Devouring Details component */
   --color-gray8: hsl(0 0% 31.2%);
   --color-gray9: hsl(0 0% 43.9%);
   --color-gray11: hsl(0 0% 62.8%);
@@ -183,6 +183,28 @@ body {
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
+/* overflow-x:hidden — prevents the phantom horizontal scrollbar that appears
+   whenever a 100vw child sits inside a page that has a vertical scrollbar
+   (the vertical bar steals ~15px of gutter, so 100vw becomes wider than
+   the visible content area). Belt-and-suspenders for full-bleed sections. */
+html, body {
+  overflow-x: hidden;
+}
+
+/* hide native scrollbars — page stays scrollable, the bar just isn't drawn.
+   scrollbar-width is the Firefox spec; ::-webkit-scrollbar covers Chrome/Safari.
+   Both must be set or one browser still draws the bar. */
+html, body {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;
+}
+
 /* Smooth theme transitions — scoped to layout elements, not motion-animated children */
 [data-theme] section,
 [data-theme] h1,
@@ -194,7 +216,7 @@ body {
   transition: color 0.3s ease;
 }
 
-/* Mono font override */
+/* Override dialkit's hardcoded mono font stack */
 .font-mono,
 [class*="font-mono"],
 code, kbd, samp, pre {
